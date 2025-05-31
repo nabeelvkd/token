@@ -1,0 +1,26 @@
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# dotenv
+.env
+.env.local
+.env.*.local
+
+# IDEs/editors
+.vscode/
+.idea/
+
+# Build output
+dist/
+build/
+coverage/
+
+# Node modules (safety, though already ignored in client/server)
+**/node_modules

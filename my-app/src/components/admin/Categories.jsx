@@ -45,7 +45,7 @@ const Categories = () => {
     const handleSave = (category) => {
         category.name = editData.name
         category.priority = editData.priority
-        axios.post('http://localhost:5000/admin/updatacategory', category).then((response) => {
+        axios.post('http://localhost:5000/admin/updateacategory', category).then((response) => {
             navigate(0)
         }).catch((error) => {
             alert(error)
@@ -176,7 +176,7 @@ const Categories = () => {
                     </table>
                 </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 justify-end">
                 <button
                     onClick={() => setShowAddForm(true)}
                     className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"

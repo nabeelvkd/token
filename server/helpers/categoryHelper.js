@@ -1,4 +1,5 @@
 const Category = require('../models/category');
+const SubCategory = require('../models/subCategory')
 const slugify = require('slugify');
 
 const addCategory = async (data) => {
@@ -29,7 +30,7 @@ const addCategory = async (data) => {
 
 const getAllCategories = async () => {
     try {
-        const categories = await Category.find().sort({ priority: 1, name: 1 });
+        const categories = await Category.find().sort({ isActive: -1, priority: -1, name: 1 });
         return { success: true, categories };
     } catch (error) {
         console.error("Error fetching all categories:", error);
@@ -39,7 +40,7 @@ const getAllCategories = async () => {
 
 const getAllActiveCategories = async () => {
     try {
-        const categories = await Category.find({ isActive: true }).sort({ priority: 1, name: 1 });
+        const categories = await Category.find({ isActive: true }).sort({ priority: -1 });
         return { success: true, categories };
     } catch (error) {
         console.error("Error fetching active categories:", error);
@@ -55,7 +56,7 @@ const updateCategory = async (data) => {
         }
 
         if (data.name && data.name !== category.name) {
-            const existing = await Category.findOne({ name: data.name, _id: { $ne: id } });
+            const existing = await Category.findOne({ name: data.name, _id: { $ne: data._id } });
             if (existing) {
                 return { error: "Another category with this name already exists." };
             }
@@ -109,11 +110,160 @@ const toggleActive = (async (id) => {
 
 })
 
+const addSubCategory = async (data) => {
+    try {
+        const existing = await SubCategory.findOne({ name: data.name });
+        if (existing) {
+            return { error: "Subcategory with this name already exists." };
+        }
+
+        const categoryExists = await Category.findById(data.category);
+        if (!categoryExists) {
+            return { error: "Referenced category does not exist." };
+        }
+
+        const slug = slugify(data.name, { lower: true, strict: true });
+
+        const subCategory = new SubCategory({
+            name: data.name,
+            slug,
+            iconUrl: data.iconUrl || "",
+            isActive: data.isActive !== undefined ? data.isActive : true,
+            priority: data.priority || 0,
+            category: data.category,
+        });
+
+        await subCategory.save();
+
+        return { success: true, subCategory };
+    } catch (error) {
+        console.error("Error adding subcategory:", error);
+        return { error: "Server error while adding subcategory." };
+    }
+};
+
+const getAllSubCategories = async () => {
+    try {
+        const subCategories = await SubCategory.find()
+            .populate('category')
+            .sort({ isActive: -1, priority: -1, name: 1 });
+        return { success: true, subCategories };
+    } catch (error) {
+        console.error("Error fetching subcategories:", error);
+        return { error: "Server error while fetching subcategories." };
+    }
+};
+
+const getActiveSubCategories = async () => {
+    try {
+        const subCategories = await SubCategory.find({ isActive: true })
+            .populate('category')
+            .sort({ priority: -1 });
+        return { success: true, subCategories };
+    } catch (error) {
+        console.error("Error fetching active subcategories:", error);
+        return { error: "Server error while fetching subcategories." };
+    }
+};
+
+const updateSubCategory = async (data) => {
+    try {
+        const subCategory = await SubCategory.findById(data._id);
+        if (!subCategory) {
+            return { error: "Subcategory not found." };
+        }
+
+        if (data.name && data.name !== subCategory.name) {
+            const existing = await SubCategory.findOne({
+                name: data.name,
+                _id: { $ne: data._id },
+            });
+            if (existing) {
+                return { error: "Another subcategory with this name already exists." };
+            }
+            subCategory.name = data.name;
+            subCategory.slug = slugify(data.name, { lower: true, strict: true });
+        }
+
+        if (data.iconUrl !== undefined) subCategory.iconUrl = data.iconUrl;
+        if (data.isActive !== undefined) subCategory.isActive = data.isActive;
+        if (data.priority !== undefined) subCategory.priority = data.priority;
+
+        if (data.category) {
+            const categoryExists = await Category.findById(data.category);
+            if (!categoryExists) {
+                return { error: "Referenced category does not exist." };
+            }
+            subCategory.category = data.category;
+        }
+
+        await subCategory.save();
+
+        return { success: true, subCategory };
+    } catch (error) {
+        console.error("Error updating subcategory:", error);
+        return { error: "Server error while updating subcategory." };
+    }
+};
+
+const deleteSubCategory = async (id) => {
+    try {
+        const subCategory = await SubCategory.findById(id);
+        if (!subCategory) {
+            return { error: "Subcategory not found." };
+        }
+
+        await subCategory.deleteOne();
+
+        return { success: true, message: "Subcategory deleted successfully." };
+    } catch (error) {
+        console.error("Error deleting subcategory:", error);
+        return { error: "Server error while deleting subcategory." };
+    }
+};
+
+const toggleSubCategoryActive = async (id) => {
+    try {
+        const subCategory = await SubCategory.findById(id);
+        if (!subCategory) {
+            return { error: "Subcategory not found." };
+        }
+
+        subCategory.isActive = !subCategory.isActive;
+        await subCategory.save();
+
+        return { success: true };
+    } catch (error) {
+        return { error: "Server error while toggling subcategory." };
+    }
+};
+
+const getByCategory = async (categoryId) => {
+  try {
+    const subCategories = await SubCategory.find({ category: categoryId, isActive: true })
+      .sort({ priority: -1, name: 1 });
+
+    return { success: true, subCategories };
+  } catch (error) {
+    console.error("Error fetching subcategories:", error);
+    return { error: "Server error while fetching subcategories." };
+  }
+};
+
+
+
 module.exports = {
     addCategory,
     getAllCategories,
     getAllActiveCategories,
     updateCategory,
     deleteCategory,
-    toggleActive
+    toggleActive,
+    addSubCategory,
+    getAllSubCategories,
+    getActiveSubCategories,
+    updateSubCategory,
+    deleteSubCategory,
+    toggleSubCategoryActive,
+    getByCategory,
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Settings, BarChart3, Package, ShoppingCart, Users, FolderOpen, FileText, LifeBuoy, PieChart, Building2 } from 'lucide-react';
+import { Settings, BarChart3, Package, ShoppingCart, Users, FolderOpen, FileText, LifeBuoy, PieChart, Building2, Folders } from 'lucide-react';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -8,10 +8,11 @@ const Sidebar = () => {
   const menuItems = [
     { icon: BarChart3, label: 'Dashboard', path: '/admin/dashboard' },
     { icon: Users, label: 'Users', path: '/admin/users' },
-    { icon: Package, label: 'Products', path: '/admin/products' },
+    { icon: FolderOpen, label: 'Categories', path: '/admin/categories' },
+    { icon: Folders, label: 'Sub Categories', path: '/admin/subcategories' },
     { icon: Users, label: 'Customers', path: '/admin/customers' },
     { icon: ShoppingCart, label: 'Orders', path: '/admin/orders' },
-    { icon: FolderOpen, label: 'Categories', path: '/admin/categories' },
+    
     { icon: Building2, label: 'Businesses', path: '/admin/businesses' },
     { icon: FileText, label: 'Reports', path: '/admin/reports' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' },

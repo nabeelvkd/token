@@ -54,9 +54,57 @@ router.get('/toggleactive', async (req, res) => {
   }
 })
 
-router.post('/updatacategory', async (req, res) => {
+router.post('/updateacategory', async (req, res) => {
   try {
     const result = await categoryHelper.updateCategory(req.body)
+    if (result.error) {
+      res.status(400).json({ message: result.error })
+    }
+    res.status(200).json({ message: "success" })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+})
+
+router.post('/addsubcategory', async (req, res) => {
+  try {
+    const result = await categoryHelper.addSubCategory(req.body)
+    if (result.error) {
+      res.status(400).json({ message: result.error })
+    }
+    return res.status(201).json({ message: 'Category added successfully', subCategory: result.subCategory });
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+})
+
+router.get('/subcategories',async(req,res)=>{
+  try{
+    const result=await categoryHelper.getAllSubCategories()
+    if(result.error){
+       res.status(400).json({ message: result.error })
+    }
+    res.status(200).json(result.subCategories)
+  }catch(error){
+    res.status(400).json({ message: error.message })
+  }
+})
+
+router.get('/toggle-subcategory', async (req, res) => {
+  try {
+    const result = await categoryHelper.toggleSubCategoryActive(req.query.id)
+    if (result.error) {
+      res.status(400).json({ message: result.error })
+    }
+    res.status(200).json({ message: "success" })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+})
+
+router.post('/update-subcategory', async (req, res) => {
+  try {
+    const result = await categoryHelper.updateSubCategory(req.body)
     if (result.error) {
       res.status(400).json({ message: result.error })
     }

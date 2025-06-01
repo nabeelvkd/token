@@ -12,6 +12,8 @@ const Categories = () => {
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({ name: '', priority: 0 });
     const [categories, setCategories] = useState([]);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -41,17 +43,18 @@ const Categories = () => {
     };
 
     const handleSave = (category) => {
-        category.name=editData.name
-        category.priority=editData.priority
-        axios.post('http://localhost:5000/admin/updatacategory',category).then((response)=>{
+        category.name = editData.name
+        category.priority = editData.priority
+        axios.post('http://localhost:5000/admin/updatacategory', category).then((response) => {
             navigate(0)
-        }).catch((error)=>{
+        }).catch((error) => {
             alert(error)
         })
         setEditingId(null);
     };
 
     const handleToggleActive = (category) => {
+
         axios.get(`http://localhost:5000/admin/toggleactive?id=${category._id}`)
             .then(response => {
                 navigate(0);
@@ -59,7 +62,23 @@ const Categories = () => {
             .catch(error => {
                 alert(error)
             });
-        
+
+    };
+
+    const handleAddCategory = () => {
+        if (!newCategoryName.trim()) {
+            alert('Category name is required');
+            return;
+        }
+        axios.post('http://localhost:5000/admin/addcategory', { name: newCategoryName })
+            .then((response) => {
+                setNewCategoryName('');
+                setShowAddForm(false);
+                navigate(0);
+            })
+            .catch((error) => {
+                alert(error);
+            });
     };
 
     const filteredCategories = categories.filter(category =>
@@ -156,6 +175,42 @@ const Categories = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div className="mt-4">
+                <button
+                    onClick={() => setShowAddForm(true)}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                    Add Category
+                </button>
+                {showAddForm && (
+                    <div className="mt-2 p-4 bg-white rounded-lg shadow-sm border border-gray-200 max-w-sm">
+                        <input
+                            type="text"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                            placeholder="Category Name"
+                        />
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={handleAddCategory}
+                                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                            >
+                                Add
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowAddForm(false);
+                                    setNewCategoryName('');
+                                }}
+                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

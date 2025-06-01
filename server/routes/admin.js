@@ -6,7 +6,7 @@ router.get('/', function (req, res, next) {
   res.send('admin');
 });
 
-router.post('/add-category', async (req, res) => {
+router.post('/addcategory', async (req, res) => {
   try {
     const result = await categoryHelper.addCategory(req.body);
 

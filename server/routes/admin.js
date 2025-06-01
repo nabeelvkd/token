@@ -33,4 +33,13 @@ router.post('/delete-category',async(req,res)=>{
     }
 })
 
+router.get('/categories',async(req,res)=>{
+    try{
+        categories=await categoryHelper.getAllCategories()
+        res.status(200).json(categories)
+    }catch(error){
+        res.status(400).json({message:error.message})
+    }
+})
+
 module.exports = router;

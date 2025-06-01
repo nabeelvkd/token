@@ -3,7 +3,7 @@ var router = express.Router();
 var categoryHelper = require('../helpers/categoryHelper');
 
 router.get('/', function (req, res, next) {
-    res.send('admin');
+  res.send('admin');
 });
 
 router.post('/add-category', async (req, res) => {
@@ -21,25 +21,49 @@ router.post('/add-category', async (req, res) => {
   }
 });
 
-router.post('/delete-category',async(req,res)=>{
-    try{
-        const result=await categoryHelper.deleteCategory(req.query.id)
-        if (result.error){
-            res.status(400).json({message:result.error})
-        }
-        res.status(200).json({message:"category deleted"})
-    }catch(error){
-        res.status(400).json({message:error.message})
+router.post('/delete-category', async (req, res) => {
+  try {
+    const result = await categoryHelper.deleteCategory(req.query.id)
+    if (result.error) {
+      res.status(400).json({ message: result.error })
     }
+    res.status(200).json({ message: "category deleted" })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
 })
 
-router.get('/categories',async(req,res)=>{
-    try{
-        categories=await categoryHelper.getAllCategories()
-        res.status(200).json(categories)
-    }catch(error){
-        res.status(400).json({message:error.message})
+router.get('/categories', async (req, res) => {
+  try {
+    categories = await categoryHelper.getAllCategories()
+    res.status(200).json(categories)
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+})
+
+router.get('/toggleactive', async (req, res) => {
+  try {
+    const result = await categoryHelper.toggleActive(req.query.id)
+    if (result.error) {
+      res.status(400).json({ message: result.error })
     }
+    res.status(200).json({ message: "success" })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+})
+
+router.post('/updatacategory', async (req, res) => {
+  try {
+    const result = await categoryHelper.updateCategory(req.body)
+    if (result.error) {
+      res.status(400).json({ message: result.error })
+    }
+    res.status(200).json({ message: "success" })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
 })
 
 module.exports = router;

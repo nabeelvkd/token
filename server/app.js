@@ -5,12 +5,14 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose')
 require('dotenv').config();
+const cors = require('cors');
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var adminRouter = require('./routes/admin')
 var app = express();
-
+app.use(cors());
 //mongodb connection
 mongoose.connect(process.env.MONGODB_URI,{
 }).then(()=> console.log("Mongodb connnected"))

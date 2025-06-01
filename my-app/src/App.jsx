@@ -1,14 +1,19 @@
-import { useState } from 'react'
-import './App.css'
+import React from 'react';
+import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import Admin from './pages/admin/Admin';
+import Home from './pages/user/Home';
 
-function App() {
-    const [count, setCount] = useState(0)
+const App = () => {
+  return (
+    <BrowserRouter>
 
-    return (
-        <>
-            hello
-        </>
-    )
-}
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/admin/*" element={<Admin />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+    </BrowserRouter>
+  );
+};
 
-export default App
+export default App;

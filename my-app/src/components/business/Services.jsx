@@ -1,12 +1,7 @@
 import React, { useState } from "react";
 
-function ServicesInfo() {
-    const [serviceType, setServiceType] = useState({
-        token: false,
-        appointment: false,
-    });
+function ServicesInfo({serviceType,setServiceType,services,setServices}) {
 
-    const [services, setServices] = useState([]);
     const [newService, setNewService] = useState({
         name: '',
         estimatedTime: '',

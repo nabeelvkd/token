@@ -4,6 +4,11 @@ import BusinessInfo from '../../components/business/BusinessInfo';
 import Services from '../../components/business/Services';
 import WorkingHours from '../../components/business/WorkingHours';
 
+const daysOfWeek = [
+    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+];
+
+
 export default function MultiStepForm() {
     const [active, setActive] = useState(1)
     const steps = [
@@ -12,17 +17,47 @@ export default function MultiStepForm() {
         { number: 3, title: 'ADD SERVICES', active: active === 3 },
         { number: 4, title: 'WORKING HOURS', active: active == 4 }
     ];
+    //Business Info
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        cat: '',
+        subCat: '',
+        location: '',
+        address: ''
+    });
+
+    const [locationStatus, setLocationStatus] = useState('');
+
+    //Services
+    const [services, setServices] = useState([]);
+    const [serviceType, setServiceType] = useState({
+        token: false,
+        appointment: false,
+    });
+
+    //Working Hours
+    const [workingHours, setWorkingHours] = useState(
+        daysOfWeek.reduce((acc, day) => {
+            acc[day] = {
+                enabled: false,
+                intervals: []
+            };
+            return acc;
+        }, {})
+    );
 
     const renderStep = () => {
         switch (active) {
             case 1:
-                return <BasicInfo setActive={setActive} />;
+                return <BasicInfo formData={formData} setFormData={setFormData} />;
             case 2:
-                return <BusinessInfo />;
+                return <BusinessInfo formData={formData} setFormData={setFormData} locationStatus={locationStatus} setLocationStatus={setLocationStatus} />;
             case 3:
-                return <Services />;
+                return <Services services={services} setServices={setServices} serviceType={serviceType} setServiceType={setServiceType} />;
             case 4:
-                return <WorkingHours />;
+                return <WorkingHours setWorkingHours={setWorkingHours} workingHours={workingHours} />;
             default:
                 return <div>Select a step</div>;
         }
@@ -31,6 +66,10 @@ export default function MultiStepForm() {
     const handleNextStep = () => {
         setActive(active + 1);
     };
+
+    const handleSubmit = () => {
+        console.log(formData,services,workingHours)
+    }
 
     return (
 
@@ -73,16 +112,19 @@ export default function MultiStepForm() {
 
             <div
                 className="mt-6 w-full px-4 md:px-8
-             relative md:fixed md:bottom-4 md:right-4 md:w-auto"
+             relative md:fixed md:bottom-10 md:right-60 md:w-auto"
             >
                 <button
-                    onClick={handleNextStep}
-                    className="mb-3 bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-colors w-full md:w-auto"
+                    onClick={active === 4 ? handleSubmit : handleNextStep}
+                    type="button"
+                    className="mb-5 bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-colors w-full md:w-auto"
                 >
-                    Next Step
+                    {active === 4 ? 'Submit' : 'Next Step'}
                 </button>
+
             </div>
 
         </div>
 
-    )
+    );
+}

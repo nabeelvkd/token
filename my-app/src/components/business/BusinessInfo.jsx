@@ -1,17 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-function BusinessInfo() {
-    const [formData, setFormData] = useState({
-        cat: '',
-        subCat: '',
-        location: '',
-        address: ''
-    });
+function BusinessInfo({ formData, setFormData,locationStatus,setLocationStatus }) {
     const [categories, setCategories] = useState([]);
     const [allSubCategories, setAllSubCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
-    const [locationStatus, setLocationStatus] = useState('');
+    
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
@@ -43,11 +37,6 @@ function BusinessInfo() {
         );
     };
 
-    const handleNextStep = () => {
-        console.log('Form data:', formData);
-        // Here you would typically navigate to the next step
-    };
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -57,7 +46,6 @@ function BusinessInfo() {
 
                 const subRes = await axios.get("http://localhost:5000/admin/subcategories");
                 const sub = subRes.data;
-                console.log(sub);
                 setAllSubCategories(sub);
             } catch (err) {
                 console.error("Fetch error", err);
@@ -68,7 +56,6 @@ function BusinessInfo() {
     }, []);
 
     useEffect(() => {
-        console.log(allSubCategories);
         const filteredSubs = allSubCategories
             .filter(item => item.category.name === formData.cat)
             .map(item => item.name);
@@ -94,6 +81,7 @@ function BusinessInfo() {
                         </label>
                         <select
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                            value={formData.cat}
                             onChange={(e) => handleInputChange('cat', e.target.value)}
                         >
                             <option value="">Select Category</option>
@@ -112,6 +100,7 @@ function BusinessInfo() {
                         <select
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                             onChange={(e) => handleInputChange('subCat', e.target.value)}
+                            value={formData.subCat}
                         >
                             <option value="">Select Sub Category</option>
                             {subCategories.map((cat, idx) => (

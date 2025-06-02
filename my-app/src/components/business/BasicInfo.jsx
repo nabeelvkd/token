@@ -1,12 +1,7 @@
 import React from "react";
 import { useState } from "react";
 
-function BasicInfo({ setActive }) {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: ''
-    });
+function BasicInfo({ formData,setFormData }) {
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({

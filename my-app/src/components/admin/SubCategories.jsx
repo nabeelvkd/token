@@ -12,6 +12,7 @@ const SubCategories = () => {
     const [editData, setEditData] = useState({ name: '', category: '', priority: 0 });
     const [newSubCategory, setNewSubCategory] = useState({ name: '', category: '', priority: 0 });
     const [showAddForm, setShowAddForm] = useState(false);
+    const [filterCategory, setFilterCategory] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -51,13 +52,39 @@ const SubCategories = () => {
             .then(() => navigate(0)).catch(err => alert(err));
     };
 
-    const filtered = subCategories.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = subCategories.filter(s => {
+        const matchesName = s.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = filterCategory ? s.category?._id === filterCategory : true;
+        return matchesName && matchesCategory;
+    });
+
 
     return (
         <>
-            <Header title="Subcategories" searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+            <Header title="Sub Categories" searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
+            <div className="flex justify-end mb-4">
+                <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border shadow-sm">
+                    <label htmlFor="category-filter" className="text-gray-700 font-medium">
+                        Category:
+                    </label>
+                    <select
+                        id="category-filter"
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value)}
+                        className="px-3 py-1.5 rounded-md focus:outline-none"
+                    >
+                        <option value="">All</option>
+                        {categories.map((cat) => (
+                            <option key={cat._id} value={cat._id}>
+                                {cat.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">

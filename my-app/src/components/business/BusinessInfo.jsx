@@ -57,11 +57,11 @@ function BusinessInfo({ formData, setFormData,locationStatus,setLocationStatus }
 
     useEffect(() => {
         const filteredSubs = allSubCategories
-            .filter(item => item.category.name === formData.cat)
+            .filter(item => item.category.name === formData.category)
             .map(item => item.name);
 
         setSubCategories(filteredSubs);
-    }, [formData.cat, allSubCategories]);
+    }, [formData.category, allSubCategories]);
 
     return (
         <div className="flex-1 p-8 md:p-12">
@@ -81,8 +81,8 @@ function BusinessInfo({ formData, setFormData,locationStatus,setLocationStatus }
                         </label>
                         <select
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                            value={formData.cat}
-                            onChange={(e) => handleInputChange('cat', e.target.value)}
+                            value={formData.category}
+                            onChange={(e) => handleInputChange('category', e.target.value)}
                         >
                             <option value="">Select Category</option>
                             {categories.map((cat, idx) => (
@@ -99,8 +99,8 @@ function BusinessInfo({ formData, setFormData,locationStatus,setLocationStatus }
                         </label>
                         <select
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                            onChange={(e) => handleInputChange('subCat', e.target.value)}
-                            value={formData.subCat}
+                            onChange={(e) => handleInputChange('subCategory', e.target.value)}
+                            value={formData.subCategory}
                         >
                             <option value="">Select Sub Category</option>
                             {subCategories.map((cat, idx) => (

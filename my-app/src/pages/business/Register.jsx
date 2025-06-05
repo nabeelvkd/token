@@ -3,6 +3,7 @@ import BasicInfo from '../../components/business/BasicInfo';
 import BusinessInfo from '../../components/business/BusinessInfo';
 import Services from '../../components/business/Services';
 import WorkingHours from '../../components/business/WorkingHours';
+import axios from 'axios';
 
 const daysOfWeek = [
     "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
@@ -20,10 +21,10 @@ export default function MultiStepForm() {
     //Business Info
     const [formData, setFormData] = useState({
         name: '',
-        email: '',
+        password: '',
         phone: '',
-        cat: '',
-        subCat: '',
+        category: '',
+        subCategory: '',
         location: '',
         address: ''
     });
@@ -68,8 +69,22 @@ export default function MultiStepForm() {
     };
 
     const handleSubmit = () => {
-        console.log(formData,services,workingHours)
-    }
+        alert('Submitting...');
+        axios.post('http://localhost:5000/business/register', {
+            formData,
+            services,
+            workingHours
+        })
+            .then((response) => {
+                alert('Registration successful');
+                console.log(response.data);
+            })
+            .catch((error) => {
+                alert('Error occurred');
+                console.error(error);
+            });
+    };
+
 
     return (
 

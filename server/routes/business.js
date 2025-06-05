@@ -7,16 +7,16 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('register',async(req,res)=>{
+router.post('/register',async(req,res)=>{
   try{
-    const result=await businessHelper.addBusiness(req.body)
+    const result=await businessHelper.registerBusiness(req.body.formData,req.body.services,req.body.workingHours)
     if (result.error){
       res.status(400).json({message:error.message})
     }
-    res.status(201).json(result)
+    res.status(201).json({message:'success'})
   }catch(error){
+    console.log(error)
     res.status(400).json({message:error.message})
   }
 })
-
 module.exports = router;

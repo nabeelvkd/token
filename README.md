@@ -6,8 +6,9 @@ Tokenify is a full-stack web application designed to help businesses manage cust
 
 🔧 For Businesses
 - Business profile & dashboard
-- Add services with custom durations
-- Choose token or appointment mode
+- Have Token and Appointment services
+- Businesses can manage staffs and assign token and appointment for them
+- Seperate dashboard for every staffs under business
 - Define working hours and breaks
 - Real-time queue/token management
 
@@ -15,7 +16,7 @@ Tokenify is a full-stack web application designed to help businesses manage cust
 - Browse/search businesses by category/location
 - Book appointments or get tokens instantly
 - Real-time token status updates
-- Notifications via Email/SMS/WhatsApp (optional)
+- Notifications via Email/SMS/WhatsApp
 
 ⚙️ For Super Admin
 - Manage all businesses and users

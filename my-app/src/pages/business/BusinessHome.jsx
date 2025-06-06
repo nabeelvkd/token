@@ -47,12 +47,12 @@ export default function BusinessHome() {
     ];
 
     useEffect(() => {
-        setTimeout(() => setIsLoading(false), 1000);
+        setTimeout(() => setIsLoading(false), 10);
     }, []);
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-blue-800 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-600">Loading your dashboard...</p>
@@ -62,10 +62,7 @@ export default function BusinessHome() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 md:ml-64 md:mt-0">
-            {/* Header */}
-            <Navbar />
-
+        <div className="min-h-screen bg-white md:ml-64 md:mt-0">
             <main className="container mx-auto px-4 md:px-8 py-6 md:mt-0 mt-5">
                 {/* Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 mt-10">
@@ -80,7 +77,7 @@ export default function BusinessHome() {
                         <p className="text-xs sm:text-sm text-gray-600">Current Token</p>
                     </div>
                     <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border border-gray-200">
-                        <h3 className="text-sm sm:text-lg font-bold text-gray-700">{tokenData.waitingCustomers}</h3>
+                        <h3 className="text-sm sm:text-lg font-bold text-red-700">{tokenData.waitingCustomers}</h3>
                         <p className="text-xs sm:text-sm text-gray-600">Waiting</p>
                     </div>
                 </div>
@@ -110,15 +107,15 @@ export default function BusinessHome() {
                                     <div className="text-lg sm:text-2xl font-bold text-blue-800">{tokenData.currentToken}</div>
                                     <div className="text-xs sm:text-sm text-gray-600">Current</div>
                                 </div>
-                                <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                    <div className="text-lg sm:text-2xl font-bold text-gray-700">{tokenData.waitingCustomers}</div>
+                                <div className="text-center p-2 sm:p-3 bg-white rounded-lg border border-gray-200">
+                                    <div className="text-lg sm:text-2xl font-bold text-red-700">{tokenData.waitingCustomers}</div>
                                     <div className="text-xs sm:text-sm text-gray-600">Waiting</div>
                                 </div>
-                                <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="text-center p-2 sm:p-3 bg-white rounded-lg border border-gray-200">
                                     <div className='text-lg sm:text-2xl font-bold text-gray-700'>{tokenData.totalTokens}</div>
                                     <div className="text-xs sm:text-sm text-gray-600">Total Today</div>
                                 </div>
-                                <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="text-center p-2 sm:p-3 bg-white rounded-lg border border-gray-200">
                                     <div className="text-lg sm:text-2xl font-bold text-gray-700">{tokenData.averageWaitTime}</div>
                                     <div className="text-xs sm:text-sm text-gray-600">Avg Wait</div>
                                 </div>
@@ -131,7 +128,7 @@ export default function BusinessHome() {
                                         : 'border-gray-200 hover:border-gray-300'
                                         }`}>
                                         <div className="flex items-center space-x-3 sm:space-x-4">
-                                            <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base ${token.status === 'current' ? 'bg-blue-800' : 'bg-gray-500'
+                                            <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base ${token.status === 'current' ? 'bg-blue-800' : 'bg-white0'
                                                 }`}>
                                                 {token.tokenNumber}
                                             </div>
@@ -178,7 +175,7 @@ export default function BusinessHome() {
 
                             <div className="space-y-2 sm:space-y-3">
                                 {(showAllAppointments ? allAppointments : allAppointments.slice(0, 2)).map((appointment) => (
-                                    <div key={appointment.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors space-y-2 sm:space-y-0">
+                                    <div key={appointment.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg border border-gray-200 hover:bg-white transition-colors space-y-2 sm:space-y-0">
                                         <div className="flex items-center space-x-3 sm:space-x-4">
                                             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-800 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                                                 {appointment.customer.charAt(0)}

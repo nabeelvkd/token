@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function ServicesInfo({serviceType,setServiceType,services,setServices}) {
+function ServicesInfo({ serviceType, setServiceType, services, setServices, reg }) {
 
     const [newService, setNewService] = useState({
         name: '',
@@ -23,7 +23,7 @@ function ServicesInfo({serviceType,setServiceType,services,setServices}) {
     };
 
     return (
-        <div className="flex-1 p-8 md:p-12">
+        <div className={`${reg ? 'flex-1 p-8 md:p-12' : 'min-h-screen bg-white md:ml-64 md:mt-0 p-20'}`}>
             <div className="grid md:grid-cols-2 gap-8">
                 {/* Left Block */}
                 <div className="md:mt-7">
@@ -35,21 +35,19 @@ function ServicesInfo({serviceType,setServiceType,services,setServices}) {
                     <div className="flex gap-4 mb-6">
                         <button
                             onClick={() => toggleServiceType('token')}
-                            className={`px-4 py-2 rounded-lg border transition ${
-                                serviceType.token
+                            className={`px-4 py-2 rounded-lg border transition ${serviceType.token
                                     ? 'bg-blue-800 text-white'
                                     : 'bg-white text-gray-700 border-gray-300'
-                            }`}
+                                }`}
                         >
                             Token
                         </button>
                         <button
                             onClick={() => toggleServiceType('appointment')}
-                            className={`px-4 py-2 rounded-lg border transition ${
-                                serviceType.appointment
+                            className={`px-4 py-2 rounded-lg border transition ${serviceType.appointment
                                     ? 'bg-blue-800 text-white'
                                     : 'bg-white text-gray-700 border-gray-300'
-                            }`}
+                                }`}
                         >
                             Appointment
                         </button>

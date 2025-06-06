@@ -56,7 +56,7 @@ export default function MultiStepForm() {
             case 2:
                 return <BusinessInfo formData={formData} setFormData={setFormData} locationStatus={locationStatus} setLocationStatus={setLocationStatus} />;
             case 3:
-                return <Services services={services} setServices={setServices} serviceType={serviceType} setServiceType={setServiceType} />;
+                return <Services reg={true} services={services} setServices={setServices} serviceType={serviceType} setServiceType={setServiceType} />;
             case 4:
                 return <WorkingHours setWorkingHours={setWorkingHours} workingHours={workingHours} />;
             default:

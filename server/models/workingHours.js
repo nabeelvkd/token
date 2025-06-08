@@ -9,7 +9,7 @@ const daySchema = {
 };
 
 const workingHoursSchema = new mongoose.Schema({
-    business: { type: mongoose.Schema.Types.ObjectId, ref: 'Business' },
+    businessId: { type: mongoose.Schema.Types.ObjectId, ref: 'Business',reqiured:true },
     Sunday: daySchema,
     Monday: daySchema,
     Tuesday: daySchema,

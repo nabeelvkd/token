@@ -4,6 +4,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import Navbar from "../../components/business/Navbar";
 import BusinessHome from "./BusinessHome";
 import Services from "../../components/business/Services";
+import Members from "../../components/business/Members"
+import ManageTokens from "../../components/business/ManageTokens"
 
 function Business() {
 
@@ -20,7 +22,9 @@ function Business() {
                 {/* Redirect from /business to /business/home */}
                 <Route path="/" element={<Navigate to="home" replace />} />
                 <Route path="home" element={<BusinessHome />} />
-                <Route path="services" element={<Services reg={false} services={services} setServices={setServices} serviceType={serviceType} setServiceType={setServiceType}/>} />
+                <Route path='members' element={<Members />} />
+                <Route path='tokens' element={<ManageTokens />} />
+                <Route path="services" element={<Services reg={true} services={services} setServices={setServices} serviceType={serviceType} setServiceType={setServiceType} />} />
             </Routes>
         </div>
     );

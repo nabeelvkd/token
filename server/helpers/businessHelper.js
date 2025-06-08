@@ -5,6 +5,7 @@ const Category = require('../models/category');       // Add these
 const SubCategory = require('../models/subCategory'); // Add these
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
+const Members = require('../models/members')
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -104,5 +105,91 @@ const login = async (phone, password) => {
     }
 };
 
+const getServices = async (businessId) => {
+    try {
+        const servicesDoc = await Service.findOne({ businessId });
 
-module.exports = { registerBusiness, login };
+        if (!servicesDoc) {
+            return { success: false, message: "No services found for this business." };
+        }
+
+        return {
+            success: true,
+            services: servicesDoc.services
+        };
+    } catch (error) {
+        console.error("Error fetching services:", error);
+        return { success: false, message: "Server error." };
+    }
+};
+
+const addService = async (businessId, data) => {
+    try {
+        const serviceDoc = await Service.findOne({ businessId });
+
+        if (!serviceDoc) {
+            return { success: false, message: "No services found for this business." };
+        }
+
+        // Ensure proper types
+        const formattedService = {
+            name: data.name,
+            estimatedTime: Number(data.estimatedTime),
+            fee: Number(data.fee)
+        };
+
+        serviceDoc.services.push(formattedService);
+        await serviceDoc.save();
+
+        return {
+            success: true,
+            message: "Service added successfully",
+            services: serviceDoc.services
+        };
+
+    } catch (error) {
+        console.error("Error adding service:", error);
+        return { success: false, message: "Server error" };
+    }
+};
+
+const addMember = async (businessId, data) => {
+    try {
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(data.password, 10);
+        const memberData = {
+            memberId: data.memberId,
+            name: data.name,
+            designation: data.designation,
+            status: data.status ?? true,
+            password: hashedPassword
+        };
+
+        let membersDoc = await Members.findOne({ businessId });
+
+        if (!membersDoc) {
+            membersDoc = new Members({
+                businessId,
+                members: [memberData]
+            });
+        } else {
+            // Optional: Prevent duplicate memberId
+            const exists = membersDoc.members.find(m => m.memberId === memberData.memberId);
+            if (exists) return { success: false, message: "Member ID already exists" };
+
+            membersDoc.members.push(memberData);
+        }
+
+        await membersDoc.save();
+
+        return { success: true, members: membersDoc.members };
+    } catch (error) {
+        console.error("Error adding member:", error);
+        return { success: false, message: "Failed to add member", error };
+    }
+};
+
+
+
+
+module.exports = { registerBusiness, login, getServices, addService, addMember };

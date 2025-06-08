@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { X } from 'lucide-react'
 
 function ServicesInfo({ serviceType, setServiceType, services, setServices, reg }) {
 
@@ -17,13 +19,77 @@ function ServicesInfo({ serviceType, setServiceType, services, setServices, reg 
 
     const handleAddService = () => {
         if (newService.name && newService.estimatedTime && newService.fee) {
-            setServices([...services, newService]);
+            const serviceToAdd = { ...newService }; // create a copy to avoid mutation
+            setServices(prev => [...prev, serviceToAdd]);
+
+            if (reg) {
+                const token = localStorage.getItem("businessToken");
+
+                axios.post("http://localhost:5000/business/addService",
+                    { service: serviceToAdd }, // use the newService directly
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                ).then((response) => {
+                    console.log("Service added:", response.data);
+                }).catch((error) => {
+                    console.error("Error adding service:", error);
+                });
+            }
+
             setNewService({ name: '', estimatedTime: '', fee: '' });
         }
     };
 
+
+
+    useEffect(() => {
+        if (reg) {
+            const token = localStorage.getItem("businessToken");
+
+            axios.get("http://localhost:5000/business/services", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    setServices(response.data.services);
+                })
+                .catch(error => {
+                    console.error("Unauthorized:", error.response?.data || error.message);
+                });
+        }
+    }, []); // dependency on reg
+
+    const handleDeleteService = (index) => {
+        const updatedServices = [...services];
+        updatedServices.splice(index, 1);
+        setServices(updatedServices);
+
+        if (reg) {
+            const token = localStorage.getItem("businessToken");
+
+            axios.post("http://localhost:5000/business/removeService",
+                { index },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            ).then(response => {
+                console.log("Service removed:", response.data);
+            }).catch(error => {
+                console.error("Error removing service:", error);
+            });
+        }
+    };
+
+
+
     return (
-        <div className={`${reg ? 'flex-1 p-8 md:p-12' : 'min-h-screen bg-white md:ml-64 md:mt-0 p-20'}`}>
+        <div className={`${!reg ? 'flex-1 p-8 md:p-12' : 'min-h-screen bg-white md:ml-64 md:mt-0 p-20'}`}>
             <div className="grid md:grid-cols-2 gap-8">
                 {/* Left Block */}
                 <div className="md:mt-7">
@@ -36,8 +102,8 @@ function ServicesInfo({ serviceType, setServiceType, services, setServices, reg 
                         <button
                             onClick={() => toggleServiceType('token')}
                             className={`px-4 py-2 rounded-lg border transition ${serviceType.token
-                                    ? 'bg-blue-800 text-white'
-                                    : 'bg-white text-gray-700 border-gray-300'
+                                ? 'bg-blue-800 text-white'
+                                : 'bg-white text-gray-700 border-gray-300'
                                 }`}
                         >
                             Token
@@ -45,8 +111,8 @@ function ServicesInfo({ serviceType, setServiceType, services, setServices, reg 
                         <button
                             onClick={() => toggleServiceType('appointment')}
                             className={`px-4 py-2 rounded-lg border transition ${serviceType.appointment
-                                    ? 'bg-blue-800 text-white'
-                                    : 'bg-white text-gray-700 border-gray-300'
+                                ? 'bg-blue-800 text-white'
+                                : 'bg-white text-gray-700 border-gray-300'
                                 }`}
                         >
                             Appointment
@@ -120,9 +186,16 @@ function ServicesInfo({ serviceType, setServiceType, services, setServices, reg 
                                             Time: {service.estimatedTime} mins | Fee: ₹{service.fee}
                                         </p>
                                     </div>
+                                    <button
+                                        onClick={() => handleDeleteService(index)}
+                                        className="text-red-100 hover:text-red-500 text-sm"
+                                    >
+                                        <X />
+                                    </button>
                                 </li>
                             ))}
                         </ul>
+
                     )}
                 </div>
             </div>

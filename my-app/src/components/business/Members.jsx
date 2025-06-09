@@ -14,9 +14,11 @@ import { useEffect } from 'react';
 export default function MemberManagement() {
     const [showPassword, setShowPassword] = useState(false);
     const [showAllMembers, setShowAllMembers] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('')
     const [formData, setFormData] = useState({
         memberId: '',
         name: '',
+        phone: '',
         designation: '',
         password: ''
     });
@@ -42,7 +44,7 @@ export default function MemberManagement() {
             headers: {
                 Authorization: `Bearer ${token}` // optional if protected
             }
-        }).then((response)=>{
+        }).then((response) => {
             setMembers(response.data.members)
         })
     }, [])
@@ -52,11 +54,12 @@ export default function MemberManagement() {
             const newMember = {
                 name: formData.name,
                 memberId: formData.memberId,
+                phone:formData.phone,
                 designation: formData.designation,
                 password: formData.password,
                 status: true, // Changed from true to "active" for consistency
             };
-            setMembers(prev=>[...prev,newMember])
+
             var token = localStorage.getItem("businessToken");
             axios.post("http://localhost:5000/business/addmember", newMember, {
                 headers: {
@@ -69,8 +72,10 @@ export default function MemberManagement() {
                     id: members.length + 1, // Fallback ID if not provided by API
                 };
                 setFormData({ memberId: '', name: '', designation: '', password: '' });
+                setMembers(prev => [...prev, newMember])
+                setErrormessage('')
             }).catch(error => {
-                console.error("Error adding member:", error.response?.data || error.message);
+                setErrorMessage(error.response.data.message)
             });
         }
     };
@@ -119,6 +124,7 @@ export default function MemberManagement() {
                             </h3>
 
                             <div className="space-y-4">
+                                <span className='text-red-600'>{errorMessage}</span>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Member ID
@@ -143,6 +149,19 @@ export default function MemberManagement() {
                                         value={formData.name}
                                         onChange={handleInputChange}
                                         placeholder="Enter name"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Phone
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter phone number"
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent text-sm"
                                     />
                                 </div>
@@ -220,7 +239,7 @@ export default function MemberManagement() {
                                                     )}
                                                 </div>
                                                 <p className="text-xs sm:text-sm text-gray-600">{member.designation} ({member.memberId})</p>
-                                                <p className="text-xs text-gray-500">Added: {member.dateAdded}</p>
+                                                <p className="text-xs text-gray-500">Phone: {member.phone}</p>
                                             </div>
                                         </div>
 

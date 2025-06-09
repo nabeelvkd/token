@@ -3,6 +3,7 @@ const mongoose=require('mongoose')
 const singleSchema=new mongoose.Schema({
     memberId:{type:String,unique:true},
     name:{type:String},
+    phone:{type:String,required:true},
     designation:{type:String},
     status:Boolean,
     password:String,

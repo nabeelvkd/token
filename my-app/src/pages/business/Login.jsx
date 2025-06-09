@@ -7,7 +7,9 @@ import {
     ArrowRight,
     Shield,
     Clock,
-    Building2
+    Building2,
+    User,
+    UserCog
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -18,8 +20,9 @@ export default function BusinessLogin() {
     const [isLoading, setIsLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [countdown, setCountdown] = useState(0);
+    const [isAdminLogin, setIsAdminLogin] = useState(false); // State for admin/member login
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         phoneNumber: '',
@@ -62,7 +65,12 @@ export default function BusinessLogin() {
         setIsLoading(true);
 
         try {
-            const response = await axios.post("http://localhost:5000/business/login", formData);
+            // Use different endpoint based on admin/member login
+            const loginUrl = isAdminLogin 
+                ? "http://localhost:5000/business/login"
+                : "http://localhost:5000/business/member/login";
+
+            const response = await axios.post(loginUrl, formData);
 
             setIsLoading(false);
 
@@ -71,8 +79,7 @@ export default function BusinessLogin() {
 
             if (token) {
                 localStorage.setItem("businessToken", token);
-                navigate('/business/home')
-                // navigate to dashboard or home if needed
+                navigate(isAdminLogin ? '/business/admin/home' : '/business/home');
             } else {
                 alert(message || "Login failed");
             }
@@ -82,7 +89,6 @@ export default function BusinessLogin() {
             alert(error.response?.data?.message || "Something went wrong during login.");
         }
     };
-
 
     const formatPhoneNumber = (value) => {
         return value;
@@ -112,6 +118,34 @@ export default function BusinessLogin() {
                     </p>
                 </div>
 
+                {/* Admin/Member Login Type Toggle */}
+                <div className="bg-white rounded-lg p-1 shadow-sm border border-gray-200">
+                    <div className="grid grid-cols-2 gap-1">
+                        <button
+                            onClick={() => setIsAdminLogin(false)}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                                !isAdminLogin
+                                    ? 'bg-blue-800 text-white'
+                                    : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                            <User className="w-4 h-4 inline mr-2" />
+                            Member Login
+                        </button>
+                        <button
+                            onClick={() => setIsAdminLogin(true)}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                                isAdminLogin
+                                    ? 'bg-blue-800 text-white'
+                                    : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                            <UserCog className="w-4 h-4 inline mr-2" />
+                            Admin Login
+                        </button>
+                    </div>
+                </div>
+
                 {/* Login Method Toggle */}
                 <div className="bg-white rounded-lg p-1 shadow-sm border border-gray-200">
                     <div className="grid grid-cols-2 gap-1">
@@ -121,10 +155,11 @@ export default function BusinessLogin() {
                                 setOtpSent(false);
                                 setCountdown(0);
                             }}
-                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${loginMethod === 'password'
-                                ? 'bg-blue-800 text-white'
-                                : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                                loginMethod === 'password'
+                                    ? 'bg-blue-800 text-white'
+                                    : 'text-gray-600 hover:text-gray-900'
+                            }`}
                         >
                             <Lock className="w-4 h-4 inline mr-2" />
                             Password
@@ -135,10 +170,11 @@ export default function BusinessLogin() {
                                 setOtpSent(false);
                                 setCountdown(0);
                             }}
-                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${loginMethod === 'otp'
-                                ? 'bg-blue-800 text-white'
-                                : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                                loginMethod === 'otp'
+                                    ? 'bg-blue-800 text-white'
+                                    : 'text-gray-600 hover:text-gray-900'
+                            }`}
                         >
                             <Shield className="w-4 h-4 inline mr-2" />
                             OTP
@@ -308,7 +344,10 @@ export default function BusinessLogin() {
                     <p className="text-sm text-gray-600 mb-3">
                         Don't have a business account?
                     </p>
-                    <button className="w-full bg-gray-700 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors flex items-center justify-center" onClick={() => navigate('/business/register')}>
+                    <button
+                        className="w-full bg-gray-700 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors flex items-center justify-center"
+                        onClick={() => navigate('/business/register')}
+                    >
                         <Building2 className="w-4 h-4 mr-2" />
                         Register Your Business
                     </button>

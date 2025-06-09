@@ -160,6 +160,7 @@ const addMember = async (businessId, data) => {
         const memberData = {
             memberId: data.memberId,
             name: data.name,
+            phone: data.phone,
             designation: data.designation,
             status: data.status ?? true,
             password: hashedPassword
@@ -174,8 +175,11 @@ const addMember = async (businessId, data) => {
             });
         } else {
             // Optional: Prevent duplicate memberId
-            const exists = membersDoc.members.find(m => m.memberId === memberData.memberId);
-            if (exists) return { success: false, message: "Member ID already exists" };
+            const exists = membersDoc.members.find(
+                m => m.memberId === memberData.memberId || m.phone === memberData.phone
+            );
+
+            if (exists) return { success: false, message: "Member ID or phone number already exists" };
 
             membersDoc.members.push(memberData);
         }

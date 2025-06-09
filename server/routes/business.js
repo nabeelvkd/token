@@ -98,6 +98,7 @@ router.post('/removeService', authMiddleware, async (req, res) => {
 router.post('/addmember', authMiddleware, async (req, res) => {
     try {
         const result = await businessHelper.addMember(req.user.id, req.body)
+        console.log(result)
         res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
         res.status(500).json({ message: 'Internal server error' });
@@ -169,6 +170,29 @@ router.get('/tokens', authMiddleware, async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
+
+router.put('/tokens/:id', authMiddleware, async (req, res) => {
+    try {
+        const doc = await Token.findById(req.params.id);
+
+        if (!doc) {
+            return res.status(404).json({ message: 'Token not found' });
+        }
+
+        if (doc.status=="active"){
+            doc.status="inactive"
+        }else{
+            doc.status="active"
+        }
+        await doc.save();
+
+        res.status(200).json({ message: 'Token status updated', status: doc.status });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 
 

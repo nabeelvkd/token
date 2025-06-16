@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import BasicInfo from '../../components/business/BasicInfo';
 import BusinessInfo from '../../components/business/BusinessInfo';
 import Services from '../../components/business/Services';
 import WorkingHours from '../../components/business/WorkingHours';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const daysOfWeek = [
     "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
@@ -18,6 +19,8 @@ export default function MultiStepForm() {
         { number: 3, title: 'ADD SERVICES', active: active === 3 },
         { number: 4, title: 'WORKING HOURS', active: active == 4 }
     ];
+    const buttonRef = useRef(null);
+    const navigate=useNavigate()
     //Business Info
     const [formData, setFormData] = useState({
         name: '',
@@ -64,31 +67,37 @@ export default function MultiStepForm() {
         }
     };
 
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();     // ✅ Prevent default browser action
+            event.stopPropagation();    // ✅ Prevent bubbling if needed
+            buttonRef.current?.click();
+        }
+    };
+
+
     const handleNextStep = () => {
         setActive(active + 1);
     };
 
     const handleSubmit = () => {
-        alert('Submitting...');
         axios.post('http://localhost:5000/business/register', {
             formData,
             services,
             workingHours
         })
             .then((response) => {
-                alert('Registration successful');
-                console.log(response.data);
+                navigate('/business/login')
             })
             .catch((error) => {
-                alert('Error occurred');
-                console.error(error);
+                alert(error.message);
             });
     };
 
 
     return (
 
-        <div className="w-full">
+        <div className="w-full " onKeyDown={handleKeyDown} tabIndex={0}>
             <div className="relative overflow-hidden">
                 {/* Container Wrapper */}
                 <div className="container mx-auto p-4 md:p-8 relative">
@@ -130,12 +139,14 @@ export default function MultiStepForm() {
              relative md:fixed md:bottom-10 md:right-60 md:w-auto"
             >
                 <button
+                    ref={buttonRef}
                     onClick={active === 4 ? handleSubmit : handleNextStep}
                     type="button"
-                    className="mb-5 bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-colors w-full md:w-auto"
+                    className="mb-5 bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-colors w-full md:w-auto focus:outline-none"
                 >
                     {active === 4 ? 'Submit' : 'Next Step'}
                 </button>
+
 
             </div>
 

@@ -16,39 +16,29 @@ const registerBusiness = async (business, services, workingHours) => {
             throw new Error('Phone number already registered');
         }
 
-        // Find category by name
         const categoryDoc = await Category.findOne({ name: business.category });
         if (!categoryDoc) throw new Error('Category not found');
 
-        // Find subcategory by name and category id
         const subCategoryDoc = await SubCategory.findOne({
             name: business.subCategory,
             category: categoryDoc._id
         });
         if (!subCategoryDoc) throw new Error('Subcategory not found');
 
-        // Replace category and subCategory names with their ObjectIds
         business.category = categoryDoc._id;
         business.subCategory = subCategoryDoc._id;
 
-        // Remove old cat and subCat fields if they exist
         delete business.cat;
         delete business.subCat;
 
-        // Hash password before saving
         const hashedPassword = await bcrypt.hash(business.password, 10);
         business.password = hashedPassword;
-
-        // Create the business
         const newBusiness = await Business.create(business);
-
-        // Create services referencing the new business id
         await Service.create({
             businessId: newBusiness._id,
             services: services
         });
 
-        // Create working hours referencing the new business id
         await WorkingHours.create({
             businessId: newBusiness._id,
             ...workingHours
@@ -64,28 +54,24 @@ const registerBusiness = async (business, services, workingHours) => {
 
 const login = async (phone, password) => {
     try {
-        // 1. Find business by phone
         const business = await Business.findOne({ phone });
 
         if (!business) {
             return { success: false, message: "Business not found" };
         }
 
-        // 2. Compare password
         const isMatch = await bcrypt.compare(password, business.password);
 
         if (!isMatch) {
             return { success: false, message: "Invalid credentials" };
         }
 
-        // 3. Create JWT payload
         const payload = {
             id: business._id,
             phone: business.phone,
             name: business.name,
         };
 
-        // 4. Sign JWT
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 
         return {
@@ -193,7 +179,33 @@ const addMember = async (businessId, data) => {
     }
 };
 
+const memberLogin = async (data) => {
+    try {
+        let businessId = await Business.findOne({ phone: data.business })
+        if (!businessId) {
+            return { success: false, message: "Business not found" }
+        }
+        businessId = businessId._id
+        let members = await Members.findOne({ businessId: businessId })
+        members = members.members
+        for (const member of members) {
+            if (member.phone === data.phoneNumber) {
+                const isMatch = await bcrypt.compare(data.password, member.password)
+                if (isMatch) {
+                    const payload = { id: member._id, businessId: member.businessId, name: member.name }
+                    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+                    return { success: true, message: "Login success", token }
+                }
+                return { success: false, message: "Invalid Password" }
+            }
+        }
+        return { success: false, message: "Member not found, Contact business" }
+    } catch (error) {
+        return { success: false, message: "Failed to add member", error };
+    }
+}
 
 
 
-module.exports = { registerBusiness, login, getServices, addService, addMember };
+
+module.exports = { registerBusiness, login, getServices, addService, addMember, memberLogin };

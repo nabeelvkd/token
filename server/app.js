@@ -32,7 +32,7 @@ app.use('/business', indexRouter);
 app.use('/', usersRouter);
 app.use('/admin',adminRouter)
 
-// catch 404 and forward to error handler
+// catch 404 and forward to error handle
 app.use(function(req, res, next) {
   next(createError(404));
 });

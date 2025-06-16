@@ -25,16 +25,17 @@ export default function BusinessLogin() {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
+        business: '',
         phoneNumber: '',
         password: '',
         otp: ''
     });
 
-    const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+    const handleInputChange = (field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
     };
 
     const handleSendOtp = async () => {
@@ -65,8 +66,7 @@ export default function BusinessLogin() {
         setIsLoading(true);
 
         try {
-            // Use different endpoint based on admin/member login
-            const loginUrl = isAdminLogin 
+            const loginUrl = isAdminLogin
                 ? "http://localhost:5000/business/login"
                 : "http://localhost:5000/business/member/login";
 
@@ -74,21 +74,28 @@ export default function BusinessLogin() {
 
             setIsLoading(false);
 
-            // Example: save JWT if returned
             const { token, message } = response.data;
+            console.log("Login response:", response.data);
 
-            if (token) {
+            if (token && isAdminLogin) {
                 localStorage.setItem("businessToken", token);
-                navigate(isAdminLogin ? '/business/admin/home' : '/business/home');
+                navigate('/business/home');
+            } else if (token) {
+                localStorage.setItem("MemberToken", token);
+                navigate('/business/member');
             } else {
-                alert(message || "Login failed");
+                alert(message || "Login failed.");
             }
         } catch (error) {
             setIsLoading(false);
+
             console.error("Login error:", error);
-            alert(error.response?.data?.message || "Something went wrong during login.");
+
+            const errorMessage = error.response?.data?.message || "Something went wrong during login.";
+            alert(errorMessage);
         }
     };
+
 
     const formatPhoneNumber = (value) => {
         return value;
@@ -123,22 +130,20 @@ export default function BusinessLogin() {
                     <div className="grid grid-cols-2 gap-1">
                         <button
                             onClick={() => setIsAdminLogin(false)}
-                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                                !isAdminLogin
-                                    ? 'bg-blue-800 text-white'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${!isAdminLogin
+                                ? 'bg-blue-800 text-white'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
                         >
                             <User className="w-4 h-4 inline mr-2" />
                             Member Login
                         </button>
                         <button
                             onClick={() => setIsAdminLogin(true)}
-                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                                isAdminLogin
-                                    ? 'bg-blue-800 text-white'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${isAdminLogin
+                                ? 'bg-blue-800 text-white'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
                         >
                             <UserCog className="w-4 h-4 inline mr-2" />
                             Admin Login
@@ -155,11 +160,10 @@ export default function BusinessLogin() {
                                 setOtpSent(false);
                                 setCountdown(0);
                             }}
-                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                                loginMethod === 'password'
-                                    ? 'bg-blue-800 text-white'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${loginMethod === 'password'
+                                ? 'bg-blue-800 text-white'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
                         >
                             <Lock className="w-4 h-4 inline mr-2" />
                             Password
@@ -170,11 +174,10 @@ export default function BusinessLogin() {
                                 setOtpSent(false);
                                 setCountdown(0);
                             }}
-                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                                loginMethod === 'otp'
-                                    ? 'bg-blue-800 text-white'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                            className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${loginMethod === 'otp'
+                                ? 'bg-blue-800 text-white'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
                         >
                             <Shield className="w-4 h-4 inline mr-2" />
                             OTP
@@ -186,6 +189,27 @@ export default function BusinessLogin() {
                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                     <div className="space-y-6">
                         {/* Phone Number */}
+                        <div className={`${isAdminLogin ? 'hidden' : ''}`}>
+                            <label htmlFor="business" className="block text-sm font-medium text-gray-700 mb-2">
+                                Business Phone Number
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Phone className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    id="business"
+                                    name="business"
+                                    type="tel"
+                                    required
+                                    value={formData.business}
+                                    onChange={(e) => handleInputChange('business', e.target.value)}
+                                    className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800 focus:z-10"
+                                    placeholder="123-456-7890"
+                                    maxLength="12"
+                                />
+                            </div>
+                        </div>
                         <div>
                             <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
                                 Phone Number
@@ -224,7 +248,7 @@ export default function BusinessLogin() {
                                         type={showPassword ? 'text' : 'password'}
                                         required
                                         value={formData.password}
-                                        onChange={handleInputChange}
+                                        onChange={(e) => handleInputChange('password', e.target.value)}
                                         className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-blue-800 focus:z-10"
                                         placeholder="Enter your password"
                                     />
@@ -340,7 +364,7 @@ export default function BusinessLogin() {
                 </div>
 
                 {/* Register Business Link */}
-                <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 text-center">
+                <div className={`${!isAdminLogin ? 'hidden' : ''} bg-white rounded-lg shadow-sm p-4 border border-gray-200 text-center`}>
                     <p className="text-sm text-gray-600 mb-3">
                         Don't have a business account?
                     </p>

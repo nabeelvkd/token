@@ -5,6 +5,7 @@ import Home from './pages/user/Home';
 import Register from './pages/business/Register'
 import Business from './pages/business/Business'
 import Login from './pages/business/Login'
+import MemberDashboard from './pages/business/Member';
 
 const App = () => {
     return (
@@ -15,6 +16,7 @@ const App = () => {
                 <Route path="/admin/*" element={<Admin />} />
                 <Route path='/business/register' element={<Register />} />
                 <Route path='/business/*' element={<Business />} />
+                <Route path='/member' element={<MemberDashboard/>}/>
                 <Route path='/business/login' element={<Login />} />
 
             </Routes>

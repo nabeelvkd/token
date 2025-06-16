@@ -51,9 +51,8 @@ router.post('/login', async (req, res) => {
     const { phoneNumber, password } = req.body;
 
     const result = await businessHelper.login(phoneNumber, password);
-
-    if (result.success) {
-        res.json(result);
+    if (!result.success) {
+        res.status(200).json(result);
     } else {
         res.status(400).json(result);
     }
@@ -98,7 +97,6 @@ router.post('/removeService', authMiddleware, async (req, res) => {
 router.post('/addmember', authMiddleware, async (req, res) => {
     try {
         const result = await businessHelper.addMember(req.user.id, req.body)
-        console.log(result)
         res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
         res.status(500).json({ message: 'Internal server error' });
@@ -192,6 +190,21 @@ router.put('/tokens/:id', authMiddleware, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+router.post('/member/login', async (req, res) => {
+    try {
+        let result = await businessHelper.memberLogin(req.body);
+
+        if (!result.success) {
+            return res.status(400).json({ message: result.message });
+        }
+
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
 
 
 

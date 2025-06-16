@@ -6,6 +6,7 @@ import Register from './pages/business/Register'
 import Business from './pages/business/Business'
 import Login from './pages/business/Login'
 import MemberDashboard from './pages/business/Member';
+import Listings from './pages/user/Listings';
 
 const App = () => {
     return (
@@ -18,7 +19,7 @@ const App = () => {
                 <Route path='/business/*' element={<Business />} />
                 <Route path='/member' element={<MemberDashboard/>}/>
                 <Route path='/business/login' element={<Login />} />
-
+                <Route path='/*' element={<Listings/>}/>
             </Routes>
         </BrowserRouter>
     );

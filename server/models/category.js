@@ -23,7 +23,7 @@ const categorySchema = new mongoose.Schema({
   },
   priority: {
     type: Number,
-    default: 0
+    default: 1
   },
   createdAt: {
     type: Date,

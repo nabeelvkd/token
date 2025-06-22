@@ -7,6 +7,7 @@ import Business from './pages/business/Business'
 import Login from './pages/business/Login'
 import MemberDashboard from './pages/business/Member';
 import Listings from './pages/user/Listings';
+import BusinessProfile from './pages/user/businessProfile';
 
 const App = () => {
     return (
@@ -19,7 +20,8 @@ const App = () => {
                 <Route path='/business/*' element={<Business />} />
                 <Route path='/member' element={<MemberDashboard/>}/>
                 <Route path='/business/login' element={<Login />} />
-                <Route path='/*' element={<Listings/>}/>
+                <Route path='/:category' element={<Listings/>}/>
+                <Route path='/:category/:business' element={<BusinessProfile/>}/>
             </Routes>
         </BrowserRouter>
     );

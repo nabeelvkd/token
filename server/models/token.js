@@ -62,6 +62,10 @@ const TokenSchema = new mongoose.Schema({
     tokensBooked: {
         type: Number,
         default: 0
+    },
+    currentToken:{
+        type:Number,
+        default:0,
     }
 });
 

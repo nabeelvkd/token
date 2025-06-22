@@ -1,15 +1,125 @@
 const Business = require('../models/business')
 const Categories = require('../models/category')
+const Service = require('../models/service')
+const Token = require('../models/token')
+const moment = require('moment');
+const TokenQueue = require('../models/tokenQueue');
 
-const getBusinessByCategory = async(category)=>{
-    try{
-        const categoryDoc=await Categories.findOne({slug:category})
-        categoryId=categoryDoc._id
-        const businesses=await Business.find({category:categoryId})
-        return {success:true,businesses}
-    }catch(error){
-        return {success:false}
+const getBusinessByCategory = async (category) => {
+    try {
+        const categoryDoc = await Categories.findOne({ slug: category })
+        categoryId = categoryDoc._id
+        const businesses = await Business.find({ category: categoryId })
+        return { success: true, businesses }
+    } catch (error) {
+        return { success: false }
     }
 }
 
-module.exports={getBusinessByCategory}
+const getBusiness = async (id) => {
+    try {
+        const business = await Business.findById(id);
+        const tokenDocs = await Token.find({ businessId: id });
+
+        const now = moment();
+        var currentDay = now.format('dddd'); // e.g., 'Monday'
+        currentDay = "Monday"
+
+        const tokens = [];
+
+        tokenDocs.forEach(token => {
+            const session = token.daySessionPairs.find(pair => pair.day === currentDay);
+            if (session) {
+                const [startStr, endStr] = session.session.split('-');
+
+                const startTime = moment(startStr, ['hA', 'hhA']).set({
+                    year: now.year(),
+                    month: now.month(),
+                    date: now.date()
+                });
+
+                const endTime = moment(endStr, ['hA', 'hhA']).set({
+                    year: now.year(),
+                    month: now.month(),
+                    date: now.date()
+                });
+
+                if (now.isBetween(startTime, endTime)) {
+                    tokens.push({
+                        id: token._id,
+                        services: token.services
+                    });
+                }
+            }
+        });
+
+        return {
+            success: true,
+            business,
+            tokens
+        };
+
+    } catch (error) {
+        console.error('Error in getBusiness:', error);
+        return { success: false };
+    }
+};
+
+const bookToken = async (data) => {
+    try {
+        const lastEntry = await TokenQueue.findOne({ tokenId: data.tokenId })
+            .sort({ queueNumber: -1 });
+
+        const queueNumber = lastEntry ? lastEntry.queueNumber + 1 : 1;
+
+        const newToken = new TokenQueue({
+            businessId: data.businessId,
+            tokenId: data.tokenId,
+            queueNumber,
+            customerName: data.name,
+            customerPhone: data.mobile,
+            status: 'waiting'
+        });
+
+        await newToken.save();
+
+        return { success: true, token: queueNumber };
+
+    } catch (error) {
+        console.error("Error booking token:", error);
+        return { success: false, message: error.message };
+    }
+};
+
+const getTokenStatus = async (tokenId) => {
+    try {
+        const lastEntry = await TokenQueue.findOne({ tokenId }).sort({ queueNumber: -1 });
+
+        const nextToken = lastEntry ? lastEntry.queueNumber + 1 : 1;
+
+        const currentEntry = await Token.findById(tokenId);
+        if (!currentEntry) {
+            return { success: false, message: 'Token not found' };
+        }
+
+        const currentToken = currentEntry.currentToken || 0;
+        const waitTime = (nextToken - currentToken) * (currentEntry.waitTime || 0); // fallback to 0 if undefined
+        
+        return {
+            success: true,
+            current: currentToken,
+            next: nextToken,
+            waitTime,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message,
+        };
+    }
+};
+
+
+
+
+module.exports = { getBusinessByCategory, getBusiness, bookToken, getTokenStatus }

@@ -145,19 +145,19 @@ router.get('/workingHours', authMiddleware, async (req, res) => {
 });
 
 router.post('/addtoken', authMiddleware, async (req, res) => {
-    try {
-        const newToken = new Token({
-            ...req.body,
-            businessId: req.user.id
-        });
+  try {
+    const newToken = new Token({
+      ...req.body,
+      businessId: req.user.id
+    });
+    await newToken.save();  
 
-        await newToken.save();
-
-        res.status(201).json({ message: 'success' });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+    res.status(201).json({ message: 'success' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 });
+
 
 router.get('/tokens', authMiddleware, async (req, res) => {
   try {

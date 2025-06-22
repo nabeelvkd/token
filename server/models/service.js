@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const singleServiceSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  tokenId:{type:mongoose.Schema.Types.ObjectId,default:null},
   estimatedTime: { type: Number, required: true }, // in minutes
   fee: { type: Number, required: true }
 }, { _id: false });

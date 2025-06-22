@@ -45,10 +45,8 @@ const tokenQueueSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound index to quickly find last token for a business & token
 tokenQueueSchema.index({ tokenId: 1, queueNumber: -1 });
 
-// Compound index for efficient filtering by business, token, and status
 tokenQueueSchema.index({ businessId: 1, tokenId: 1, status: 1 });
 
 

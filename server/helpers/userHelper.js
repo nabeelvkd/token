@@ -44,7 +44,7 @@ const getBusiness = async (id) => {
                     date: now.date()
                 });
 
-                if (now.isBetween(startTime, endTime)) {
+                if (1||now.isBetween(startTime, endTime)) {
                     tokens.push({
                         id: token._id,
                         services: token.services

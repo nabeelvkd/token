@@ -3,164 +3,200 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 function Token({ services }) {
-    const [selectedService, setSelectedService] = useState('Select a Token');
-    const [tokenData, setTokenData] = useState({ current: 0, next: 0, waitTime: '0h 0m' });
-    const [showForm, setShowForm] = useState(false);
-    const [formData, setFormData] = useState({ name: '', mobile: '' });
-    const location = useLocation()
+  const [selectedService, setSelectedService] = useState('Select a Token');
+  const [tokenData, setTokenData] = useState({ current: 0, next: 0, waitTime: '0h 0m' });
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ name: '', mobile: '' });
+  const [isAnimating, setIsAnimating] = useState(false);
+  const location = useLocation();
 
-    const pathParts = location.pathname.split('/');
-    const businessId = pathParts[pathParts.length - 1];
+  const pathParts = location.pathname.split('/');
+  const businessId = pathParts[pathParts.length - 1];
 
-    useEffect(() => {
+  useEffect(() => {
     if (selectedService === "Select a Token" || !selectedService) return;
 
     const fetchTokenStatus = async () => {
-        try {
-            const response = await axios.get(`http://localhost:5000/token/${selectedService}`);
-            setTokenData(response.data);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
+      try {
+        const response = await axios.get(`http://localhost:5000/token/${selectedService}`);
+        setTokenData(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
     fetchTokenStatus();
-}, [selectedService]);
+  }, [selectedService]);
 
+  useEffect(() => {
+    if (selectedService === "Select a Token" || !selectedService) return;
 
+    const eventSource = new EventSource(`http://localhost:5000/tokenstream/${selectedService}`);
 
-    const handleBookToken = () => {
-        setShowForm(true);
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setIsAnimating(true); // Trigger animation
+      setTokenData({
+        current: data.currentToken,
+        next: data.nextToken || tokenData.next, // Ensure next token is updated if provided
+        waitTime: data.waitTime || tokenData.waitTime,
+      });
+      // Reset animation after a short delay
+      setTimeout(() => setIsAnimating(false), 1000);
     };
 
-    const handleFormSubmit = (e) => {
-        e.preventDefault();
-
-        // Extract business ID from pathname
-
-
-        axios.post("http://localhost:5000/booktoken", {
-            tokenId: selectedService,
-            businessId,
-            ...formData
-        }).then((response) => {
-            console.log(response.data);
-        });
-
-        console.log('Booking Token:', { selectedService, businessId, ...formData });
-
-        setShowForm(false);
-        setFormData({ name: '', mobile: '' });
+    eventSource.onerror = (err) => {
+      console.error("EventSource failed:", err);
+      eventSource.close();
     };
 
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value,
-        }));
+    return () => {
+      eventSource.close(); // Clean up
     };
+  });
 
-    return (
-        <div>
-            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
-                <h2 className="text-2xl font-light text-gray-900 mb-6">Token System</h2>
+  const handleBookToken = () => {
+    setShowForm(true);
+  };
 
-                <select
-                    className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 mb-8 focus:border-blue-500 focus:outline-none"
-                    value={selectedService}
-                    onChange={(e) => setSelectedService(e.target.value)}
-                >
-                    <option>Select Service</option>
-                    {services.map((token) => (
-                        <option key={token.id} value={token.id}>
-                            {token.services.join(', ')}
-                        </option>
-                    ))}
-                </select>
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
 
-                <div className="grid grid-cols-3 gap-6 mb-8">
-                    <div className="text-center p-6 border-2 border-gray-300 rounded-xl">
-                        <div className="text-gray-900 text-4xl font-bold text-green-500 mb-2 token-highlight">
-                            {tokenData.current}
-                        </div>
-                        <div className="text-gray-600 text-sm uppercase tracking-wide">Current Token</div>
-                    </div>
-                    <div className="text-center p-6 border-2 border-gray-300 rounded-xl">
-                        <div className="text-gray-900 text-4xl font-bold text-blue-600 mb-2">
-                            {tokenData.next}
-                        </div>
-                        <div className="text-gray-600 text-sm uppercase tracking-wide">Next Token</div>
-                    </div>
-                    <div className="text-center p-6 border-2 border-gray-300 rounded-xl">
-                        <div className="text-gray-900 text-4xl font-bold mb-2 text-red-600">
-                            {tokenData.waitTime}
-                        </div>
-                        <div className="text-gray-600 text-sm uppercase tracking-wide">Wait Time</div>
-                    </div>
-                </div>
+    axios.post("http://localhost:5000/booktoken", {
+      tokenId: selectedService,
+      businessId,
+      ...formData
+    }).then((response) => {
+      console.log(response.data);
+    }).catch((error) => {
+      console.error("Error booking token:", error.response?.data || error.message);
+    });
 
-                <button
-                    className="w-full bg-blue-500 text-white p-4 rounded-lg text-lg font-medium uppercase tracking-wide hover:bg-blue-600 transition-colors"
-                    onClick={handleBookToken}
-                >
-                    Book Token
-                </button>
+    console.log('Booking Token:', { selectedService, businessId, ...formData });
+
+    setShowForm(false);
+    setFormData({ name: '', mobile: '' });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  return (
+    <div>
+      <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
+        <h2 className="text-2xl font-light text-gray-900 mb-6">Token System</h2>
+
+        <select
+          className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 mb-8 focus:border-blue-500 focus:outline-none"
+          value={selectedService}
+          onChange={(e) => setSelectedService(e.target.value)}
+        >
+          <option>Select a Token</option>
+          {services.map((token) => (
+            <option key={token.id} value={token.id}>
+              {token.services.join(', ')}
+            </option>
+          ))}
+        </select>
+
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          <div className="text-center p-6 border-2 border-gray-300 rounded-xl">
+            <div className={`text-gray-900 text-4xl font-bold text-green-500 mb-2 ${isAnimating ? 'token-update' : ''}`}>
+              {tokenData.current}
             </div>
-
-            {showForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-4">Book Your Token</h3>
-                        <form onSubmit={handleFormSubmit}>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    className="w-full p-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                                    placeholder="Enter your name"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
-                                <input
-                                    type="tel"
-                                    name="mobile"
-                                    value={formData.mobile}
-                                    onChange={handleInputChange}
-                                    className="w-full p-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                                    placeholder="Enter mobile number"
-                                    pattern="[0-9]{10}"
-                                    title="Please enter a 10-digit mobile number"
-                                    required
-                                />
-                            </div>
-                            <div className="flex justify-end gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowForm(false)}
-                                    className="bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <div className="text-gray-600 text-sm uppercase tracking-wide">Current Token</div>
+          </div>
+          <div className="text-center p-6 border-2 border-gray-300 rounded-xl">
+            <div className="text-gray-900 text-4xl font-bold text-blue-600 mb-2">
+              {tokenData.next}
+            </div>
+            <div className="text-gray-600 text-sm uppercase tracking-wide">Next Token</div>
+          </div>
+          <div className="text-center p-6 border-2 border-gray-300 rounded-xl">
+            <div className="text-gray-900 text-4xl font-bold mb-2 text-red-600">
+              {tokenData.waitTime}
+            </div>
+            <div className="text-gray-600 text-sm uppercase tracking-wide">Wait Time</div>
+          </div>
         </div>
-    );
+
+        <button
+          className="w-full bg-blue-500 text-white p-4 rounded-lg text-lg font-medium uppercase tracking-wide hover:bg-blue-600 transition-colors"
+          onClick={handleBookToken}
+        >
+          Book Token
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Book Your Token</h3>
+            <form onSubmit={handleFormSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number</label>
+                <input
+                  type="tel"
+                  name="mobile"
+                  value={formData.mobile}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                  placeholder="Enter mobile number"
+                  pattern="[0-9]{10}"
+                  title="Please enter a 10-digit mobile number"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="bg-gray-500 text-white p-2 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      <style>
+        {`
+          @keyframes tokenUpdate {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+          }
+          .token-update {
+            animation: tokenUpdate 0.8s ease-in-out;
+          }
+        `}
+      </style>
+    </div>
+  );
 }
 
 export default Token;

@@ -7,6 +7,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 var Members = require('../models/members')
 var WorkingHours = require('../models/workingHours')
 var Token = require('../models/token')
+var TokenQueue=require('../models/tokenQueue')
+const eventBus=require('../eventbus')
 
 function convertTo12Hour(time) {
     const [hour, minute] = time.split(':');
@@ -205,8 +207,27 @@ router.post('/member/login', async (req, res) => {
     }
 });
 
+router.get('/fetchtokendata/:tokenId',authMiddleware,async(req,res)=>{
+    try{
+        result = await TokenQueue.find({tokenId:req.params.tokenId})
+        res.status(200).json(result)
+    }catch(error){
+        res.status(400).json({message:error.message})
+    }
+})
 
-
+router.put('/nexttoken/:tokenId', authMiddleware, async (req, res) => {
+    try {
+        await Token.updateOne(
+            { _id: req.params.tokenId },
+            { $inc: { currentToken: 1 } }
+        );
+        eventBus.emit('tokenUpdated', req.params.tokenId);
+        res.status(200).json({ message: "Current token incremented" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 
 

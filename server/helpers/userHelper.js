@@ -2,7 +2,8 @@ const Business = require('../models/business')
 const Categories = require('../models/category')
 const Service = require('../models/service')
 const Token = require('../models/token')
-const moment = require('moment');
+const moment = require('moment')
+const SubCategory=require('../models/subCategory')
 const TokenQueue = require('../models/tokenQueue');
 
 const getBusinessByCategory = async (category) => {
@@ -20,6 +21,8 @@ const getBusiness = async (id) => {
     try {
         const business = await Business.findById(id);
         const tokenDocs = await Token.find({ businessId: id });
+        const subCatDoc = await SubCategory.findById(business.subCategory)
+        const subCategory=subCatDoc.name
 
         const now = moment();
         var currentDay = now.format('dddd'); // e.g., 'Monday'
@@ -52,11 +55,11 @@ const getBusiness = async (id) => {
                 }
             }
         });
-
+        business.subCategory=subCategory
         return {
             success: true,
             business,
-            tokens
+            tokens,
         };
 
     } catch (error) {
@@ -103,7 +106,7 @@ const getTokenStatus = async (tokenId) => {
         }
 
         const currentToken = currentEntry.currentToken || 0;
-        const waitTime = (nextToken - currentToken) * (currentEntry.waitTime || 0); // fallback to 0 if undefined
+        const waitTime = (nextToken - currentToken) * (currentEntry.waitTime || 0);
         
         return {
             success: true,

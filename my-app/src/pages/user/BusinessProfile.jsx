@@ -4,20 +4,24 @@ import { Star, Calendar, Clock, MapPin, User, MessageSquare, Plus } from 'lucide
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import Token from '../../components/user/token';
+import MapView from '../../components/user/MapView';
 
 export default function BusinessProfile() {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlot, setSelectedSlot] = useState('');
     const [appointmentNotes, setAppointmentNotes] = useState('');
-    const [services,setServices] = useState([])
+    const [services, setServices] = useState([])
+    const [tokenData, setTokenData] = useState({ current: 0, next: 0, waitTime: '0h 0m' });
+    const [selectedService, setSelectedService] = useState('Select a Token');
     const [reviewForm, setReviewForm] = useState({
         rating: 0,
         comment: '',
         name: ''
     });
-    const [business,setBusiness]=useState({
-        name:'',
-        address:''
+    const [business, setBusiness] = useState({
+        name: '',
+        address: '',
+        location:{latitude:9.9463,longitude:76.8337}
     })
     const location = useLocation()
 
@@ -27,13 +31,24 @@ export default function BusinessProfile() {
         axios.get(`http://localhost:5000/businessprofile${location.pathname}`)
             .then((response) => {
                 if (!ignore) {
+                    console.log(response.data.business)
                     setBusiness(response.data.business);
                     setServices(response.data.tokens);
+
+                    const firstTokenId = response.data.tokens[0]?.id;
+                    if (firstTokenId) {
+                        setSelectedService(firstTokenId);
+
+                        axios.get(`http://localhost:5000/token/${firstTokenId}`).then((res) => {
+                            setTokenData(res.data);
+                        }).catch((err) => console.error("Initial tokenData fetch error", err));
+                    }
                 }
             });
 
         return () => { ignore = true; };
     }, []);
+
 
     const [reviews, setReviews] = useState([
         {
@@ -54,23 +69,6 @@ export default function BusinessProfile() {
 
     const timeSlots = [
         { time: '9:00 AM', available: true },
-        { time: '9:30 AM', available: false },
-        { time: '10:00 AM', available: true },
-        { time: '10:30 AM', available: true },
-        { time: '11:00 AM', available: false },
-        { time: '11:30 AM', available: true },
-        { time: '12:00 PM', available: true },
-        { time: '12:30 PM', available: false },
-        { time: '1:00 PM', available: true },
-        { time: '1:30 PM', available: true },
-        { time: '2:00 PM', available: false },
-        { time: '2:30 PM', available: true },
-        { time: '3:00 PM', available: true },
-        { time: '3:30 PM', available: true },
-        { time: '4:00 PM', available: false },
-        { time: '4:30 PM', available: true },
-        { time: '5:00 PM', available: true },
-        { time: '5:30 PM', available: false }
     ];
 
     const handleAppointmentBook = () => {
@@ -125,7 +123,7 @@ export default function BusinessProfile() {
     return (
         <div className="min-h-screen bg-white font-sans">
             <HomeNavbar />
-            
+
             <div className="max-w-6xl mx-auto p-6">
 
                 {/* Header */}
@@ -137,7 +135,7 @@ export default function BusinessProfile() {
                             </div>
                             <div>
                                 <h1 className="text-3xl font-light text-gray-900 mb-2">{business.name}</h1>
-                                <p className="text-gray-600 mb-3">Premium Hair Salon & Styling</p>
+                                <p className="text-gray-600 mb-3">{business.subCategory}</p>
                                 <div className="flex items-center text-gray-500">
                                     <MapPin className="w-4 h-4 mr-2" />
                                     <span>{business.address}</span>
@@ -155,9 +153,10 @@ export default function BusinessProfile() {
 
                     {/* Left Column */}
                     <div className="lg:col-span-2 space-y-8">
+                        {/*Map*/}
 
                         {/* Token Section */}
-                        <Token services={services}/>
+                        <Token services={services} setSelectedService={setSelectedService} selectedService={selectedService} tokenData={tokenData} setTokenData={setTokenData} />
 
                         {/* Appointment Section */}
                         <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
@@ -242,8 +241,11 @@ export default function BusinessProfile() {
                         </div>
                     </div>
 
+
+
                     {/* Right Column */}
                     <div className="space-y-8">
+                        <MapView latitude={business.location.latitude} longitude={business.location.longitude} />
 
                         {/* Add Review */}
                         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">

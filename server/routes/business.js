@@ -7,8 +7,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 var Members = require('../models/members')
 var WorkingHours = require('../models/workingHours')
 var Token = require('../models/token')
-var TokenQueue=require('../models/tokenQueue')
-const eventBus=require('../eventbus')
+var TokenQueue = require('../models/tokenQueue')
+const eventBus = require('../eventbus')
 
 function convertTo12Hour(time) {
     const [hour, minute] = time.split(':');
@@ -51,13 +51,12 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const { phoneNumber, password } = req.body;
-
     const result = await businessHelper.login(phoneNumber, password);
     if (!result.success) {
-        res.status(200).json(result);
-    } else {
-        res.status(400).json(result);
+        res.status(400).json({ message: "login failed" });
     }
+    res.status(200).json(result);
+
 });
 
 router.get('/services', authMiddleware, async (req, res) => {
@@ -147,28 +146,28 @@ router.get('/workingHours', authMiddleware, async (req, res) => {
 });
 
 router.post('/addtoken', authMiddleware, async (req, res) => {
-  try {
-    const newToken = new Token({
-      ...req.body,
-      businessId: req.user.id
-    });
-    await newToken.save();  
+    try {
+        const newToken = new Token({
+            ...req.body,
+            businessId: req.user.id
+        });
+        await newToken.save();
 
-    res.status(201).json({ message: 'success' });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+        res.status(201).json({ message: 'success' });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 });
 
 
 router.get('/tokens', authMiddleware, async (req, res) => {
-  try {
-    const tokens = await Token.find({ businessId: req.user.id });
-    res.status(200).json(tokens);
-  } catch (error) {
-    console.error('Error fetching tokens:', error);
-    res.status(400).json({ message: error.message });
-  }
+    try {
+        const tokens = await Token.find({ businessId: req.user.id });
+        res.status(200).json(tokens);
+    } catch (error) {
+        console.error('Error fetching tokens:', error);
+        res.status(400).json({ message: error.message });
+    }
 });
 
 router.put('/tokens/:id', authMiddleware, async (req, res) => {
@@ -179,10 +178,10 @@ router.put('/tokens/:id', authMiddleware, async (req, res) => {
             return res.status(404).json({ message: 'Token not found' });
         }
 
-        if (doc.status=="active"){
-            doc.status="inactive"
-        }else{
-            doc.status="active"
+        if (doc.status == "active") {
+            doc.status = "inactive"
+        } else {
+            doc.status = "active"
         }
         await doc.save();
 
@@ -207,12 +206,12 @@ router.post('/member/login', async (req, res) => {
     }
 });
 
-router.get('/fetchtokendata/:tokenId',authMiddleware,async(req,res)=>{
-    try{
-        result = await TokenQueue.find({tokenId:req.params.tokenId})
+router.get('/fetchtokendata/:tokenId', authMiddleware, async (req, res) => {
+    try {
+        result = await TokenQueue.find({ tokenId: req.params.tokenId })
         res.status(200).json(result)
-    }catch(error){
-        res.status(400).json({message:error.message})
+    } catch (error) {
+        res.status(400).json({ message: error.message })
     }
 })
 

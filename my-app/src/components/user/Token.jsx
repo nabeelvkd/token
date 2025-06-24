@@ -2,9 +2,8 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-function Token({ services }) {
-    const [selectedService, setSelectedService] = useState('Select a Token');
-    const [tokenData, setTokenData] = useState({ current: 0, next: 0, waitTime: '0h 0m' });
+function Token({ services,selectedService,setSelectedService,tokenData,setTokenData }) {
+    
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({ name: '', mobile: '' });
     const [isAnimating, setIsAnimating] = useState(false);
@@ -42,7 +41,6 @@ function Token({ services }) {
                 next: data.nextToken,
                 waitTime: data.waitTime || tokenData.waitTime,
             });
-            // Reset animation after a short delay
             setTimeout(() => setIsAnimating(false), 1000);
         };
 
@@ -97,11 +95,10 @@ function Token({ services }) {
                 <h2 className="text-2xl font-light text-gray-900 mb-6">Token System</h2>
 
                 <select
-                    className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 mb-8 focus:border-blue-500 focus:outline-none"
+                    className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 mb-8 focus:border-blue-800 focus:outline-none"
                     value={selectedService}
                     onChange={(e) => setSelectedService(e.target.value)}
                 >
-                    <option>Select a Token</option>
                     {services.map((token) => (
                         <option key={token.id} value={token.id}>
                             {token.services.join(', ')}
@@ -131,7 +128,7 @@ function Token({ services }) {
                 </div>
 
                 <button
-                    className="w-full bg-blue-500 text-white p-4 rounded-lg text-lg font-medium uppercase tracking-wide hover:bg-blue-600 transition-colors"
+                    className="w-full bg-blue-800 text-white p-4 rounded-lg text-lg font-medium uppercase tracking-wide hover:bg-blue-600 transition-colors"
                     onClick={handleBookToken}
                 >
                     Book Token

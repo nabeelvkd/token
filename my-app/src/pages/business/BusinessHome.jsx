@@ -9,9 +9,11 @@ import {
 } from 'lucide-react';
 import Navbar from '../../components/business/Navbar';
 import CalendarComponent from '../../components/business/Calendar';
+import useBusinessAuth from '../../authentication/authBusiness';
 
 
 export default function BusinessHome() {
+    useBusinessAuth()
     const [activeTab, setActiveTab] = useState('overview');
     const [isLoading, setIsLoading] = useState(true);
 

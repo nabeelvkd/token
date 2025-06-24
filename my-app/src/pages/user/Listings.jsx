@@ -11,7 +11,7 @@ function Listings() {
   const navigate=useNavigate()
 
   useEffect(() => {
-    axios.get(`http://localhost:5000${location.pathname}`)
+    axios.get(`http://localhost:5000/listing${location.pathname}`)
       .then((response) => {
         setBusinesses(response.data.businesses || []);
       })

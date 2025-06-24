@@ -70,11 +70,11 @@ router.post('/addsubcategory', async (req, res) => {
   try {
     const result = await categoryHelper.addSubCategory(req.body)
     if (result.error) {
-      res.status(400).json({ message: result.error })
+      return res.status(400).json({ message: result.error })
     }
     return res.status(201).json({ message: 'Category added successfully', subCategory: result.subCategory });
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    return res.status(400).json({ message: error.error })
   }
 })
 

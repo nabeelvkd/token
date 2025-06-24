@@ -15,12 +15,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function BusinessLogin() {
-    const [loginMethod, setLoginMethod] = useState('password'); // 'password' or 'otp'
+    const [loginMethod, setLoginMethod] = useState('password'); 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [countdown, setCountdown] = useState(0);
-    const [isAdminLogin, setIsAdminLogin] = useState(false); // State for admin/member login
+    const [isAdminLogin, setIsAdminLogin] = useState(false); 
 
     const navigate = useNavigate();
 
@@ -82,7 +82,7 @@ export default function BusinessLogin() {
                 navigate('/business/home');
             } else if (token) {
                 localStorage.setItem("MemberToken", token);
-                navigate('/business/member');
+                navigate('/member');
             } else {
                 alert(message || "Login failed.");
             }

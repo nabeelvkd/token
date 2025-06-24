@@ -1,11 +1,14 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import PinMap from "../../components/business/PinMap"
 
-function BusinessInfo({ formData, setFormData,locationStatus,setLocationStatus }) {
+function BusinessInfo({ formData, setFormData, locationStatus, setLocationStatus }) {
     const [categories, setCategories] = useState([]);
     const [allSubCategories, setAllSubCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
-    
+    const [latitude,setLatitude]=useState(null)
+    const [longitude,setLongitude]=useState(null)
+
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
@@ -14,28 +17,6 @@ function BusinessInfo({ formData, setFormData,locationStatus,setLocationStatus }
         }));
     };
 
-    const handleFetchLocation = () => {
-        if (!navigator.geolocation) {
-            setLocationStatus('Geolocation is not supported by your browser.');
-            return;
-        }
-
-        setLocationStatus('Locating...');
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                setFormData(prev => ({
-                    ...prev,
-                    location: { latitude, longitude }
-                }));
-                setLocationStatus(`Location captured: (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
-            },
-            (error) => {
-                console.error("Geolocation error:", error);
-                setLocationStatus('Unable to retrieve your location. Please allow location access.');
-            }
-        );
-    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -71,10 +52,6 @@ function BusinessInfo({ formData, setFormData,locationStatus,setLocationStatus }
                     <p className="text-gray-500 mb-8">
                         Please provide your name, phone number and create a password.
                     </p>
-                </div>
-
-
-                <div className="">
                     <div>
                         <label className="block text-gray-700 font-medium mb-2">
                             Category
@@ -125,22 +102,11 @@ function BusinessInfo({ formData, setFormData,locationStatus,setLocationStatus }
                             rows="4"
                         />
                     </div>
+                </div>
 
-                    <div className="mt-4">
-                        <button
-                            type="button"
-                            onClick={handleFetchLocation}
-                            className="w-full md:w-auto px-6 py-3 bg-blue-900 hover:bg-blue-800 text-white rounded-lg font-medium transition-colors"
-                            aria-label="Fetch current location"
-                        >
-                            Fetch Location
-                        </button>
-                        {locationStatus && (
-                            <p className={`text-sm mt-2 ${locationStatus.includes('Unable') ? 'text-red-600' : 'text-blsck'}`}>
-                                {locationStatus}
-                            </p>
-                        )}
-                    </div>
+
+                <div className="md:ml-20 md:mt-1 sm:mt-5">
+                    <PinMap setFormData={setFormData}/>
                 </div>
             </div>
         </div>

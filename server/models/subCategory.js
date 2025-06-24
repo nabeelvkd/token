@@ -8,11 +8,10 @@ const subCategorySchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
     slug: {
       type: String,
-      unique: true,
+
     },
     iconUrl: {
       type: String,
@@ -37,10 +36,11 @@ const subCategorySchema = new mongoose.Schema(
   }
 );
 
-// Auto-generate slug before save
 subCategorySchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true, strict: true });
   next();
 });
+
+subCategorySchema.index({ name: 1, category: 1 }, { unique: true });
 
 module.exports = mongoose.model('SubCategory', subCategorySchema);

@@ -29,19 +29,6 @@ const TokenSchema = new mongoose.Schema({
             }
         }
     ],
-    daySessionPairs: [
-        {
-            day: {
-                type: String,
-                enum: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                required: true
-            },
-            session: {
-                type: String,
-                required: true
-            }
-        }
-    ],
     maxTokensPerSession: {
         type: Number,
         required: true

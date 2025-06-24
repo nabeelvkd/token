@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import ManageToken from '../../components/business/TokenStatus';
+import TokenStatus from '../../components/business/TokenStatus';
 import {
     Calendar,
     Clock,
@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../../components/business/Navbar';
 import CalendarComponent from '../../components/business/Calendar';
-import useBusinessAuth from '../../authentication/authBusiness';
+import useBusinessAuth from '../../authentication/useBusinessAuth';
 
 
 export default function BusinessHome() {
@@ -66,7 +66,7 @@ export default function BusinessHome() {
                     {/* Token Management */}
                     <div className="xl:col-span-2 space-y-6">
                         {/* Token Queue */}
-                        <ManageToken/>
+                        <TokenStatus admin={true}/>
 
                         {/* Appointments */}
                         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-200">

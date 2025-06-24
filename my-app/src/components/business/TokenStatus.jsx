@@ -3,7 +3,7 @@ import { Hash, CheckCircle, Clock } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
-export default function ManageToken() {
+export default function ManageToken({ admin }) {
     const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState("");
     const [tokenData, setTokenData] = useState({});
@@ -13,14 +13,19 @@ export default function ManageToken() {
     const [formError, setFormError] = useState("");
     const tokenListRef = useRef(null);
 
-    const jwtToken = localStorage.getItem("businessToken");
+    const jwtToken = localStorage.getItem("businessToken") || localStorage.getItem("MemberToken");
 
     let businessId = null;
+    let decoded = null
 
     if (jwtToken) {
         try {
-            const decoded = jwtDecode(jwtToken);
-            businessId = decoded.id;
+            decoded = jwtDecode(jwtToken);
+            if (decoded.businessId) {
+                businessId = decoded.businessId
+            } else {
+                businessId = decoded.id;
+            }
         } catch (error) {
             console.error("Invalid token:", error);
         }
@@ -33,7 +38,15 @@ export default function ManageToken() {
             .get(`http://localhost:5000/businessprofile/${businessId}`)
             .then((response) => {
                 const fetchedServices = response.data?.tokens || [];
-                setServices(fetchedServices);
+                if (!admin) {
+                    const filteredItems = fetchedServices.filter(item =>
+                        item.members.some(member => member._id === decoded.id)
+                    );
+                    setServices(filteredItems)
+                } else {
+                    setServices(fetchedServices);
+                }
+
             })
             .catch((error) => console.error("Error fetching services:", error));
     }, []);
@@ -85,7 +98,7 @@ export default function ManageToken() {
                 ...prev,
                 current: prev.current + 1,
             }));
-            // Auto-scroll to the current token
+
             setTimeout(() => {
                 const currentTokenElement = tokenListRef.current?.querySelector(
                     `[data-queue-number="${tokenData.current + 1}"]`
@@ -132,9 +145,19 @@ export default function ManageToken() {
             businessId,
             ...newTokenForm
         }).then((response) => {
-            console.log(response.data);
             setShowModal(false);
+            setAllTokens((prev) => [
+                ...prev,
+                {
+                    customerName: newTokenForm.name,
+                    customerPhone: newTokenForm.mobile,
+                    queueNumber: prev.length > 0 ? prev[prev.length - 1].queueNumber + 1 : 1,
+                },
+            ]);
+
+            console.log(allTokens, newTokenForm)
             setNewTokenForm({ name: "", mobile: "" });
+            setTokenData(prev => ({ ...prev, next: prev.next + 1 }));
             setFormError("");
         }).catch((error) => {
             console.error(error);
@@ -219,7 +242,7 @@ export default function ManageToken() {
                             value={selectedService}
                             onChange={(e) => setSelectedService(e.target.value)}
                         >
-                            <option value="">Select Service</option>
+                            <option value="">Select Token</option>
                             {services.map((service) => (
                                 <option key={service.id} value={service.id}>
                                     {service.services.join(", ")}
@@ -240,16 +263,18 @@ export default function ManageToken() {
                         )}
                     </div>
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={tokenData.current === tokenData.next ? null : nextToken}
-                            disabled={tokenData.current === tokenData.next}
-                            className={`px-4 py-2 rounded-lg text-sm transition-colors ${tokenData.current === tokenData.next
-                                ? "bg-blue-300 text-white cursor-not-allowed"
-                                : "bg-blue-800 text-white hover:bg-blue-900"
-                                }`}
-                        >
-                            Next Token
-                        </button>
+                        {selectedService && (
+                            <button
+                                onClick={tokenData.current === tokenData.next ? null : nextToken}
+                                disabled={tokenData.current >= tokenData.next}
+                                className={`px-4 py-2 rounded-lg text-sm transition-colors ${tokenData.current === tokenData.next
+                                    ? "bg-blue-300 text-white cursor-not-allowed"
+                                    : "bg-blue-800 text-white hover:bg-blue-900"
+                                    }`}
+                            >
+                                Next Token
+                            </button>
+                        )}
                         <button
                             onClick={() => setShowModal(true)}
                             disabled={!selectedService || !tokenData.status}
@@ -299,7 +324,7 @@ export default function ManageToken() {
                             key={token.id}
                             data-queue-number={token.queueNumber}
                             className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg border-2 transition-all duration-300 ease-in-out space-y-2 sm:space-y-0 ${token.queueNumber === tokenData.current
-                                ? "border-blue-800 bg-blue-50 scale-95"
+                                ? "border-blue-800 bg-blue-50 "
                                 : "border-gray-200 hover:border-gray-300"
                                 }`}
                         >

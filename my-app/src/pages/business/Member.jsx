@@ -1,49 +1,26 @@
-import { useState } from 'react';
+import { useState ,useEffect} from 'react';
+import axios from 'axios';
 import {
     Calendar,
-    Clock,
-    Hash,
-    CheckCircle,
     Archive,
     User,
     LogOut,
     Briefcase,
 } from 'lucide-react';
+import useMemberAuth from "../../authentication/useMemberAuth"
+import { useNavigate } from 'react-router-dom';
+import TokenStatus from '../../components/business/TokenStatus'
+import { jwtDecode } from 'jwt-decode';
 
 export default function MemberDashboard() {
+    useMemberAuth()
+    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState('tokens');
-    const [selectedTokenType, setSelectedTokenType] = useState('haircutting');
-    const [selectedToken, setSelectedToken] = useState(null);
-    const [tokenNumbers, setTokenNumbers] = useState({
-        haircutting: 15,
-        keratin: 10,
-    });
+
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-    const [showTokenHistory, setShowTokenHistory] = useState(false);
     const [showAppointmentHistory, setShowAppointmentHistory] = useState(false);
-    const [tokenData, setTokenData] = useState({
-        haircutting: [
-            { id: 1, tokenNumber: 15, customer: "John Smith", service: "Haircutting", status: "current", time: "10:30 AM" },
-            { id: 2, tokenNumber: 16, customer: "Sarah Johnson", service: "Haircutting", status: "waiting", time: "10:45 AM" },
-            { id: 3, tokenNumber: 17, customer: "Mike Davis", service: "Haircutting", status: "waiting", time: "11:00 AM" },
-            { id: 4, tokenNumber: 18, customer: "Emma Wilson", service: "Haircutting", status: "waiting", time: "11:15 AM" },
-        ],
-        keratin: [
-            { id: 1, tokenNumber: 10, customer: "Lisa White", service: "Keratin Treatment", status: "current", time: "11:00 AM" },
-            { id: 2, tokenNumber: 11, customer: "David Brown", service: "Keratin Treatment", status: "waiting", time: "11:30 AM" },
-            { id: 3, tokenNumber: 12, customer: "Anna Davis", service: "Keratin Treatment", status: "waiting", time: "12:00 PM" },
-        ],
-    });
-    const [pastTokenData, setPastTokenData] = useState({
-        haircutting: [
-            { id: 1, tokenNumber: 13, customer: "Tom Harris", service: "Haircutting", status: "completed", time: "Yesterday, 2:00 PM" },
-            { id: 2, tokenNumber: 14, customer: "Jane Lee", service: "Haircutting", status: "completed", time: "Yesterday, 3:30 PM" },
-        ],
-        keratin: [
-            { id: 1, tokenNumber: 8, customer: "Emily Clark", service: "Keratin Treatment", status: "completed", time: "Yesterday, 1:00 PM" },
-            { id: 2, tokenNumber: 9, customer: "Michael Adams", service: "Keratin Treatment", status: "completed", time: "Yesterday, 4:00 PM" },
-        ],
-    });
+    const token = localStorage.getItem("MemberToken");
+    const decoded=jwtDecode(token)
 
     const allAppointments = [
         { id: 1, customer: "Alice Brown", service: "Haircutting", time: "2:00 PM", status: "confirmed" },
@@ -59,64 +36,14 @@ export default function MemberDashboard() {
         { id: 3, customer: "Chris Evans", service: "Haircutting", time: "Yesterday, 2:30 PM", status: "completed" },
     ];
 
-    const profileData = {
-        name: "John Doe",
-        business: "Elegant Salon",
-    };
 
-    const handleNextToken = () => {
-        if (selectedTokenType && tokenData[selectedTokenType].length > 0) {
-            setTokenData(prev => {
-                const currentTokens = [...prev[selectedTokenType]];
-                const currentToken = currentTokens.find(t => t.status === "current");
-                let updatedTokens = currentTokens;
 
-                // Mark current token as completed and move to history
-                if (currentToken) {
-                    const completedToken = {
-                        ...currentToken,
-                        status: "completed",
-                        time: new Date().toLocaleString('en-US', {
-                            weekday: 'long',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        })
-                    };
-                    setPastTokenData(prevPast => ({
-                        ...prevPast,
-                        [selectedTokenType]: [...prevPast[selectedTokenType], completedToken],
-                    }));
-                    updatedTokens = currentTokens.filter(t => t.id !== currentToken.id);
-                }
-
-                // Set next token as current
-                const nextToken = updatedTokens.find(t => t.tokenNumber === tokenNumbers[selectedTokenType] + 1);
-                if (nextToken) {
-                    updatedTokens = updatedTokens.map(t =>
-                        t.id === nextToken.id ? { ...t, status: "current" } : t
-                    );
-                    setSelectedToken({ ...nextToken, status: "current" });
-                } else {
-                    setSelectedToken(null);
-                }
-
-                return {
-                    ...prev,
-                    [selectedTokenType]: updatedTokens,
-                };
-            });
-
-            setTokenNumbers(prev => ({
-                ...prev,
-                [selectedTokenType]: prev[selectedTokenType] + 1,
-            }));
-        }
-    };
 
     const handleLogout = () => {
-        console.log("Logout clicked");
-        setShowProfileDropdown(false);
+        const confirm = window.confirm("Would you like to proceed with logging out?")
+        if (!confirm) return
+        localStorage.removeItem('MemberToken')
+        navigate('/business/login')
     };
 
     return (
@@ -135,13 +62,13 @@ export default function MemberDashboard() {
                             <div className="p-4 border-b border-gray-200">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                                        {profileData.name.charAt(0)}
+                                        {decoded.name.charAt(0)}
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-semibold text-black">{profileData.name}</h4>
+                                        <h4 className="text-sm font-semibold text-black">{decoded.name}</h4>
                                         <p className="text-xs text-gray-600 flex items-center">
                                             <Briefcase className="w-3 h-3 mr-1" />
-                                            {profileData.business}
+                                            {decoded.business}
                                         </p>
                                     </div>
                                 </div>
@@ -174,107 +101,7 @@ export default function MemberDashboard() {
                 </div>
 
                 {activeTab === 'tokens' && (
-                    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-200">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
-                            <h3 className="text-base sm:text-lg font-semibold text-black flex items-center">
-                                <Hash className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-800" />
-                                Token Selection
-                            </h3>
-                            <div className="flex space-x-2">
-                                <select
-                                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-                                    value={selectedTokenType}
-                                    onChange={(e) => {
-                                        setSelectedTokenType(e.target.value);
-                                        setSelectedToken(null);
-                                        setShowTokenHistory(false);
-                                    }}
-                                >
-                                    <option value="haircutting">Haircutting</option>
-                                    <option value="keratin">Keratin Treatment</option>
-                                </select>
-                                <button
-                                    onClick={handleNextToken}
-                                    className="bg-blue-800 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-900 transition-colors"
-                                    disabled={tokenData[selectedTokenType].length === 0}
-                                >
-                                    Next Token
-                                </button>
-                            </div>
-                        </div>
-
-                        {selectedTokenType && (
-                            <div className="space-y-3">
-                                <h4 className="text-sm font-semibold text-gray-700">Current Tokens</h4>
-                                {tokenData[selectedTokenType].length === 0 ? (
-                                    <p className="text-sm text-gray-600">No active tokens available.</p>
-                                ) : (
-                                    tokenData[selectedTokenType].map(token => (
-                                        <div
-                                            key={token.id}
-                                            className={`p-4 rounded-lg border-2 cursor-pointer ${selectedToken?.id === token.id ? 'border-blue-800 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}
-                                            onClick={() => setSelectedToken(token)}
-                                        >
-                                            <div className="flex items-center space-x-4">
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base ${token.status === 'current' ? 'bg-blue-800' : 'bg-gray-200'}`}>
-                                                    {token.tokenNumber}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-medium text-black text-base">{token.customer}</h4>
-                                                    <p className="text-sm text-gray-600">{token.service}</p>
-                                                </div>
-                                                <div className="flex items-center space-x-4">
-                                                    <span className="text-sm text-gray-600">{token.time}</span>
-                                                    {token.status === 'current' ? (
-                                                        <CheckCircle className="w-5 h-5 text-blue-800" />
-                                                    ) : (
-                                                        <Clock className="w-5 h-5 text-gray-500" />
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-
-                                <button
-                                    onClick={() => setShowTokenHistory(!showTokenHistory)}
-                                    className="w-full text-center py-2 text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center text-sm"
-                                >
-                                    <Archive className="w-4 h-4 mr-2" />
-                                    {showTokenHistory ? 'Hide History' : 'Show History'}
-                                </button>
-
-                                {showTokenHistory && (
-                                    <div className="space-y-3">
-                                        <h4 className="text-sm font-semibold text-gray-700">Past Tokens</h4>
-                                        {pastTokenData[selectedTokenType].length === 0 ? (
-                                            <p className="text-sm text-gray-600">No past tokens available.</p>
-                                        ) : (
-                                            pastTokenData[selectedTokenType].map(token => (
-                                                <div key={token.id} className="p-4 rounded-lg border border-gray-200 hover:bg-gray-50">
-                                                    <div className="flex items-center space-x-4">
-                                                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base bg-gray-500">
-                                                            {token.tokenNumber}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <h4 className="font-medium text-black text-base">{token.customer}</h4>
-                                                            <p className="text-sm text-gray-600">{token.service}</p>
-                                                        </div>
-                                                        <div className="flex items-center space-x-4">
-                                                            <span className="text-sm text-gray-600">{token.time}</span>
-                                                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                                                {token.status}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                    <TokenStatus admin={false}/>
                 )}
 
                 {activeTab === 'appointments' && (

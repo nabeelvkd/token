@@ -9,7 +9,7 @@ const Members = require('../models/members')
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const registerBusiness = async (business, services, workingHours) => {
+const registerBusiness = async (business) => {
     try {
         const existingBusiness = await Business.findOne({ phone: business.phone });
         if (existingBusiness) {
@@ -31,18 +31,12 @@ const registerBusiness = async (business, services, workingHours) => {
         delete business.cat;
         delete business.subCat;
 
+        const [lat, lng] = business.location.split(',').map(Number);
+        business.location = { latitude: lat, longitude: lng };
+
         const hashedPassword = await bcrypt.hash(business.password, 10);
         business.password = hashedPassword;
         const newBusiness = await Business.create(business);
-        await Service.create({
-            businessId: newBusiness._id,
-            services: services
-        });
-
-        await WorkingHours.create({
-            businessId: newBusiness._id,
-            ...workingHours
-        });
 
         return { success: true, businessId: newBusiness._id };
 
@@ -111,21 +105,26 @@ const getServices = async (businessId) => {
 
 const addService = async (businessId, data) => {
     try {
-        const serviceDoc = await Service.findOne({ businessId });
-
-        if (!serviceDoc) {
-            return { success: false, message: "No services found for this business." };
-        }
-
-        // Ensure proper types
         const formattedService = {
             name: data.name,
             estimatedTime: Number(data.estimatedTime),
-            fee: Number(data.fee)
+            fee: Number(data.fee),
+            tokenId: data.tokenId || null
         };
 
-        serviceDoc.services.push(formattedService);
-        await serviceDoc.save();
+        let serviceDoc = await Service.findOne({ businessId });
+
+        if (!serviceDoc) {
+            // Create new service document with first service
+            serviceDoc = await Service.create({
+                businessId,
+                services: [formattedService]
+            });
+        } else {
+            // Add to existing services array
+            serviceDoc.services.push(formattedService);
+            await serviceDoc.save();
+        }
 
         return {
             success: true,
@@ -139,9 +138,9 @@ const addService = async (businessId, data) => {
     }
 };
 
+
 const addMember = async (businessId, data) => {
     try {
-        // Hash the password
         const hashedPassword = await bcrypt.hash(data.password, 10);
         const memberData = {
             memberId: data.memberId,
@@ -160,7 +159,7 @@ const addMember = async (businessId, data) => {
                 members: [memberData]
             });
         } else {
-            // Optional: Prevent duplicate memberId
+        
             const exists = membersDoc.members.find(
                 m => m.memberId === memberData.memberId || m.phone === memberData.phone
             );
@@ -181,18 +180,18 @@ const addMember = async (businessId, data) => {
 
 const memberLogin = async (data) => {
     try {
-        let businessId = await Business.findOne({ phone: data.business })
-        if (!businessId) {
+        let businessDoc = await Business.findOne({ phone: data.business })
+        if (!businessDoc) {
             return { success: false, message: "Business not found" }
         }
-        businessId = businessId._id
-        let members = await Members.findOne({ businessId: businessId })
+        let businessId = businessDoc._id
+        let members = await Members.findOne({ businessId })
         members = members.members
         for (const member of members) {
             if (member.phone === data.phoneNumber) {
                 const isMatch = await bcrypt.compare(data.password, member.password)
                 if (isMatch) {
-                    const payload = { id: member._id, businessId: member.businessId, name: member.name }
+                    const payload = { id: member._id, businessId, name: member.name,business:businessDoc.name }
                     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
                     return { success: true, message: "Login success", token }
                 }
@@ -201,11 +200,8 @@ const memberLogin = async (data) => {
         }
         return { success: false, message: "Member not found, Contact business" }
     } catch (error) {
-        return { success: false, message: "Failed to add member", error };
+        return { success: false, message: error.message, error };
     }
 }
-
-
-
 
 module.exports = { registerBusiness, login, getServices, addService, addMember, memberLogin };

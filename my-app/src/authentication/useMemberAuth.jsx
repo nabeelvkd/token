@@ -2,11 +2,11 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
 
-const useBusinessAuth = () => {
+const useMemberAuth = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('businessToken');
+        const token = localStorage.getItem('MemberToken');
 
         if (!token) {
             navigate('/business/login');
@@ -18,14 +18,14 @@ const useBusinessAuth = () => {
             const currentTime = Date.now() / 1000;
 
             if (decoded.exp < currentTime) {
-                localStorage.removeItem('yourToken');
+                localStorage.removeItem('MemberToken');
                 navigate('/business/login');
             }
         } catch (error) {
-            localStorage.removeItem('yourToken');
+            localStorage.removeItem('MemberToken');
             navigate('/business/login');
         }
     }, []);
 };
 
-export default useBusinessAuth;
+export default useMemberAuth;

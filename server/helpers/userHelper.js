@@ -3,7 +3,7 @@ const Categories = require('../models/category')
 const Service = require('../models/service')
 const Token = require('../models/token')
 const moment = require('moment')
-const SubCategory=require('../models/subCategory')
+const SubCategory = require('../models/subCategory')
 const TokenQueue = require('../models/tokenQueue');
 
 const getBusinessByCategory = async (category) => {
@@ -20,43 +20,24 @@ const getBusinessByCategory = async (category) => {
 const getBusiness = async (id) => {
     try {
         const business = await Business.findById(id);
+        if (!business) {
+            return { success: false };
+        }
+
         const tokenDocs = await Token.find({ businessId: id });
-        const subCatDoc = await SubCategory.findById(business.subCategory)
-        const subCategory=subCatDoc.name
 
-        const now = moment();
-        var currentDay = now.format('dddd'); // e.g., 'Monday'
-        currentDay = "Monday"
+        const subCatDoc = await SubCategory.findById(business.subCategory);
+        const subCategory = subCatDoc ? subCatDoc.name : "Unknown";
 
-        const tokens = [];
+        const tokens = tokenDocs.map(token => ({
+            id: token._id,
+            services: token.services,
+            status: token.status,
+            members:token.assignedMembers
+        }));
 
-        tokenDocs.forEach(token => {
-            const session = token.daySessionPairs.find(pair => pair.day === currentDay);
-            if (session) {
-                const [startStr, endStr] = session.session.split('-');
+        business.subCategory = subCategory;
 
-                const startTime = moment(startStr, ['hA', 'hhA']).set({
-                    year: now.year(),
-                    month: now.month(),
-                    date: now.date()
-                });
-
-                const endTime = moment(endStr, ['hA', 'hhA']).set({
-                    year: now.year(),
-                    month: now.month(),
-                    date: now.date()
-                });
-
-                if (1||now.isBetween(startTime, endTime)) {
-                    tokens.push({
-                        id: token._id,
-                        services: token.services,
-                        status:token.status
-                    });
-                }
-            }
-        });
-        business.subCategory=subCategory
         return {
             success: true,
             business,
@@ -69,10 +50,16 @@ const getBusiness = async (id) => {
     }
 };
 
+
 const bookToken = async (data) => {
     try {
         const lastEntry = await TokenQueue.findOne({ tokenId: data.tokenId })
             .sort({ queueNumber: -1 });
+
+        const tokenDoc = await Token.findById(data.tokenId)
+        if (!tokenDoc.status) {
+            return { success: false, message: "Token Booking is Closed" }
+        }
 
         const queueNumber = lastEntry ? lastEntry.queueNumber + 1 : 1;
 
@@ -108,13 +95,13 @@ const getTokenStatus = async (tokenId) => {
 
         const currentToken = currentEntry.currentToken || 0;
         const waitTime = (nextToken - currentToken) * (currentEntry.waitTime || 0);
-        
+
         return {
             success: true,
             current: currentToken,
             next: nextToken,
             waitTime,
-            status:currentEntry.status
+            status: currentEntry.status
         };
     } catch (error) {
         return {

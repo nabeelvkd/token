@@ -113,13 +113,15 @@ const toggleActive = (async (id) => {
 const addSubCategory = async (data) => {
     try {
         const existing = await SubCategory.findOne({ name: data.name });
-        if (existing) {
-            return { error: "Subcategory with this name already exists." };
-        }
+
 
         const categoryExists = await Category.findById(data.category);
         if (!categoryExists) {
             return { error: "Referenced category does not exist." };
+        }
+
+        if (existing && existing.category.toString() === data.category) {
+            return { error: "Subcategory with this name already exists in this category." };
         }
 
         const slug = slugify(data.name, { lower: true, strict: true });
@@ -239,15 +241,15 @@ const toggleSubCategoryActive = async (id) => {
 };
 
 const getByCategory = async (categoryId) => {
-  try {
-    const subCategories = await SubCategory.find({ category: categoryId, isActive: true })
-      .sort({ priority: -1, name: 1 });
+    try {
+        const subCategories = await SubCategory.find({ category: categoryId, isActive: true })
+            .sort({ priority: -1, name: 1 });
 
-    return { success: true, subCategories };
-  } catch (error) {
-    console.error("Error fetching subcategories:", error);
-    return { error: "Server error while fetching subcategories." };
-  }
+        return { success: true, subCategories };
+    } catch (error) {
+        console.error("Error fetching subcategories:", error);
+        return { error: "Server error while fetching subcategories." };
+    }
 };
 
 

@@ -20,7 +20,6 @@ export default function TokenManagement() {
         tokenName: '',
         services: [],
         assignedMembers: [],
-        daySessionPairs: [],
         maxTokensPerSession: '',
         bookingMinutesBefore: ''
     });
@@ -66,19 +65,6 @@ export default function TokenManagement() {
             })
             .catch(error => {
                 console.error("Error fetching members:", error.response?.data || error.message);
-            });
-
-        // Fetch working hours
-        axios.get("http://localhost:5000/business/workingHours", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then(response => {
-                setWorking(response.data);
-            })
-            .catch(error => {
-                console.error("Error fetching working hours:", error.response?.data || error.message);
             });
 
         // Fetch tokens (single call)
@@ -138,39 +124,19 @@ export default function TokenManagement() {
         });
     };
 
-    const handleDaySessionSelection = (day, session) => {
-        const pairExists = formData.daySessionPairs.some(pair =>
-            pair.day === day && pair.session === session
-        );
 
-        setFormData(prev => ({
-            ...prev,
-            daySessionPairs: pairExists
-                ? prev.daySessionPairs.filter(pair =>
-                    !(pair.day === day && pair.session === session)
-                )
-                : [...prev.daySessionPairs, { day, session }]
-        }));
-    };
-
-    const isDaySessionSelected = (day, session) => {
-        return formData.daySessionPairs.some(pair =>
-            pair.day === day && pair.session === session
-        );
-    };
 
     const handleSubmit = () => {
         if (formData.tokenName && formData.services.length > 0 && formData.assignedMembers.length > 0 &&
-            formData.daySessionPairs.length > 0 && formData.maxTokensPerSession && formData.bookingMinutesBefore) {
+             formData.maxTokensPerSession && formData.bookingMinutesBefore) {
 
             const newToken = {
                 tokenName: formData.tokenName,
                 services: formData.services,
                 assignedMembers: formData.assignedMembers,
-                daySessionPairs: formData.daySessionPairs,
                 maxTokensPerSession: parseInt(formData.maxTokensPerSession),
                 bookingMinutesBefore: parseInt(formData.bookingMinutesBefore),
-                status: 'active',
+                status: false,
                 dateCreated: new Date().toISOString().split('T')[0],
                 tokensBooked: 0
             };
@@ -192,7 +158,6 @@ export default function TokenManagement() {
                         tokenName: '',
                         services: [],
                         assignedMembers: [],
-                        daySessionPairs: [],
                         maxTokensPerSession: '',
                         bookingMinutesBefore: ''
                     });
@@ -321,37 +286,6 @@ export default function TokenManagement() {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Select Day & Session Combinations
-                                    </label>
-                                    <p className="text-xs text-gray-500 mb-3">
-                                        Choose specific day-session combinations ({formData.daySessionPairs.length} selected)
-                                    </p>
-
-                                    <div className="border border-gray-300 rounded-lg p-3 max-h-64 overflow-y-auto">
-                                        {daysOfWeek.map((day) => (
-                                            <div key={day} className="mb-4 last:mb-0">
-                                                <h4 className="text-sm font-medium text-gray-800 mb-2">{day}</h4>
-                                                <div className="flex flex-wrap gap-2 ml-4">
-                                                    {workingSchedule[day].map((session) => (
-                                                        <button
-                                                            key={`${day}-${session}`}
-                                                            type="button"
-                                                            onClick={() => handleDaySessionSelection(day, session)}
-                                                            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${isDaySessionSelected(day, session)
-                                                                ? 'bg-blue-800 text-white'
-                                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                                }`}
-                                                        >
-                                                            {session}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
@@ -453,13 +387,6 @@ export default function TokenManagement() {
                                                         <div className="flex items-center mb-1">
                                                             <Calendar className="w-3 h-3 mr-1" />
                                                             <span className="font-medium">Day-Session Schedule:</span>
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-1 ml-4">
-                                                            {token.daySessionPairs.map((pair, idx) => (
-                                                                <span key={idx} className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
-                                                                    {pair.day.slice(0, 3)} {pair.session}
-                                                                </span>
-                                                            ))}
                                                         </div>
                                                     </div>
 

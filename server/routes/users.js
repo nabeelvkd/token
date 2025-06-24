@@ -22,11 +22,11 @@ router.get('/businessprofile/:businessId', async (req, res) => {
   try {
     result = await userHelper.getBusiness(req.params.businessId)
     if (!result.success) {
-      res.status(400).json({ message: 'internal error' })
+      return res.status(400).json({ message: 'internal error' })
     }
-    res.status(200).json(result)
+    return res.status(200).json(result)
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    return res.status(400).json({ message: error.message })
   }
 })
 

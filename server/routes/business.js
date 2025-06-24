@@ -31,14 +31,13 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-/* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', { title: 'Express' });
 });
 
 router.post('/register', async (req, res) => {
     try {
-        const result = await businessHelper.registerBusiness(req.body.formData, req.body.services, req.body.workingHours)
+        const result = await businessHelper.registerBusiness(req.body.formData)
         if (result.error) {
             res.status(400).json({ message: error.message })
         }
@@ -67,7 +66,6 @@ router.get('/services', authMiddleware, async (req, res) => {
 
 router.post('/addService', authMiddleware, async (req, res) => {
     const b_Id = req.user.id
-    console.log(req.body)
     const result = await businessHelper.addService(b_Id, req.body.service)
 
     res.status(result.success ? 200 : 404).json(result);
@@ -195,7 +193,6 @@ router.put('/tokens/:id', authMiddleware, async (req, res) => {
 router.post('/member/login', async (req, res) => {
     try {
         let result = await businessHelper.memberLogin(req.body);
-
         if (!result.success) {
             return res.status(400).json({ message: result.message });
         }
@@ -243,6 +240,7 @@ router.put('/toggletoken/:tokenId', authMiddleware, async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+
 
 
 

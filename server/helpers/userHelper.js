@@ -50,7 +50,8 @@ const getBusiness = async (id) => {
                 if (1||now.isBetween(startTime, endTime)) {
                     tokens.push({
                         id: token._id,
-                        services: token.services
+                        services: token.services,
+                        status:token.status
                     });
                 }
             }
@@ -113,6 +114,7 @@ const getTokenStatus = async (tokenId) => {
             current: currentToken,
             next: nextToken,
             waitTime,
+            status:currentEntry.status
         };
     } catch (error) {
         return {

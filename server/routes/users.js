@@ -18,7 +18,7 @@ router.get('/listing/:category', async (req, res) => {
   res.status(200).json(result)
 });
 
-router.get('/businessprofile/:category/:businessId', async (req, res) => {
+router.get('/businessprofile/:businessId', async (req, res) => {
   try {
     result = await userHelper.getBusiness(req.params.businessId)
     if (!result.success) {
@@ -68,7 +68,7 @@ router.get('/tokenstream/:tokenId', (req, res) => {
     try {
       const token = await Token.findById(tokenId);
       const queue=await TokenQueue.findOne({tokenId}).sort({ queueNumber: -1 });
-      const result={currentToken:token.currentToken,nextToken:queue.queueNumber+1}
+      const result={currentToken:token.currentToken,nextToken:queue.queueNumber+1,status:token.status}
       if (!token) {
         res.write(`event: error\ndata: ${JSON.stringify({ message: 'Token not found' })}\n\n`);
         return;

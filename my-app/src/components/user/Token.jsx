@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Clock } from 'lucide-react'
 
-function Token({ services,selectedService,setSelectedService,tokenData,setTokenData }) {
-    
+function Token({ services, selectedService, setSelectedService, tokenData, setTokenData }) {
+
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({ name: '', mobile: '' });
     const [isAnimating, setIsAnimating] = useState(false);
@@ -39,6 +40,7 @@ function Token({ services,selectedService,setSelectedService,tokenData,setTokenD
             setTokenData({
                 current: data.currentToken,
                 next: data.nextToken,
+                status:data.status,
                 waitTime: data.waitTime || tokenData.waitTime,
             });
             setTimeout(() => setIsAnimating(false), 1000);
@@ -92,7 +94,15 @@ function Token({ services,selectedService,setSelectedService,tokenData,setTokenD
     return (
         <div>
             <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
-                <h2 className="text-2xl font-light text-gray-900 mb-6">Token System</h2>
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
+                        <Clock className="w-6 h-6 mr-3 text-blue-600" />
+                        Queue Status
+                    </h2>
+                    <span className={`text-white p-2 rounded-full animate-pulse ${tokenData.status ? 'bg-green-600' : 'bg-red-600'}`}>
+                        
+                    </span>
+                </div>
 
                 <select
                     className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 mb-8 focus:border-blue-800 focus:outline-none"
@@ -128,11 +138,13 @@ function Token({ services,selectedService,setSelectedService,tokenData,setTokenD
                 </div>
 
                 <button
-                    className="w-full bg-blue-800 text-white p-4 rounded-lg text-lg font-medium uppercase tracking-wide hover:bg-blue-600 transition-colors"
+                    className={`w-full text-white p-4 rounded-lg text-lg font-medium uppercase tracking-wide transition-colors ${tokenData.status ? 'bg-blue-800 hover:bg-blue-600' : 'bg-gray-400'}`}
                     onClick={handleBookToken}
+                    disabled={!tokenData.status}
                 >
                     Book Token
                 </button>
+
             </div>
 
             {showForm && (

@@ -20,7 +20,6 @@ function Business() {
             <Navbar />
             <Routes>
                 {/* Redirect from /business to /business/home */}
-                <Route path="/" element={<Navigate to="home" replace />} />
                 <Route path="home" element={<BusinessHome />} />
                 <Route path='members' element={<Members />} />
                 <Route path='tokens' element={<ManageTokens />} />

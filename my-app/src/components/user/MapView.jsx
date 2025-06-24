@@ -59,7 +59,7 @@ export default function MapView({ latitude, longitude }) {
         
         <button
           onClick={handleGetDirections}
-          className="w-full bg-blue-500 text-white p-4 rounded-lg font-medium uppercase tracking-wide hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2"
+          className="w-full bg-blue-800 text-white p-4 rounded-lg font-medium uppercase tracking-wide hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2"
         >
           <Navigation className="w-4 h-4" />
           <span>Get Directions</span>

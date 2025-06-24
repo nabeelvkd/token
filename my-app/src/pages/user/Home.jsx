@@ -29,7 +29,7 @@ export default function Home() {
     const handleSelectCategory = (category) => {
         setSelectedCategory(category);
         category=slugify(category)
-        navigate(`/${category}`)
+        navigate(`/view/${category}`)
     };
 
     return (

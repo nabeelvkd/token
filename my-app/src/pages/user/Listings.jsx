@@ -8,10 +8,12 @@ import { useNavigate } from 'react-router-dom';
 function Listings() {
   const location = useLocation();
   const [businesses, setBusinesses] = useState([]);
-  const navigate=useNavigate()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/listing${location.pathname}`)
+    const parts = location.pathname.split('/');
+    const id = parts[parts.length - 1];
+    axios.get(`http://localhost:5000/listing/${id}`)
       .then((response) => {
         setBusinesses(response.data.businesses || []);
       })
@@ -20,7 +22,7 @@ function Listings() {
       });
   }, [location.pathname]);
 
-  const handleSelect=(business)=>{
+  const handleSelect = (business) => {
     navigate(`${business._id}`)
   }
 
@@ -33,9 +35,9 @@ function Listings() {
             {businesses.map((b) => (
               <Card
                 key={b._id}
-                category={b.name} 
-                onSelect={()=>handleSelect(b)}
-                />
+                category={b.name}
+                onSelect={() => handleSelect(b)}
+              />
             ))}
           </div>
         ) : (

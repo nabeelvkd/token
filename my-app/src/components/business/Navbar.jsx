@@ -4,11 +4,12 @@ import {
     Menu, X, User, Briefcase, Clock, Hash, Calendar,
     Home as HomeIcon, Star, LogOut, Users
 } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [companyName,setCompanyName]=useState('')
+    const navigate=useNavigate()
 
     const menuItems = [
         { name: "Home", icon: HomeIcon, path: "/business/home" },
@@ -26,24 +27,16 @@ function Navbar() {
     };
 
     const handleLogout = () => {
-        console.log("Logging out...");
+        const confirm=window.confirm("Would you like to proceed with logging out?")
+        if(!confirm) return;
+        localStorage.removeItem('businessToken')
+        navigate('/business/login')
     };
 
     const navLinkStyle = ({ isActive }) =>
         `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${isActive ? "bg-blue-100 text-blue-800" : "text-gray-600 hover:bg-indigo-50 hover:text-blue-800"
         }`;
 
-    useEffect(() => {
-        const token = localStorage.getItem("businessToken");
-
-        if (token) {
-            // Decode the JWT to get payload (requires base64 decoding)
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            setCompanyName(payload.name)
-        }else{
-            navigate('business/login')
-        }
-    }, [])
     return (
         <div className="relative">
             {/* Mobile Top Bar */}

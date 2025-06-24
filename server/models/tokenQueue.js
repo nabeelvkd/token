@@ -28,7 +28,6 @@ const tokenQueueSchema = new mongoose.Schema({
   },
   customerPhone: {
     type: String,
-    required: true
   },
   status: {
     type: String,

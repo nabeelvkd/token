@@ -51,9 +51,8 @@ const TokenSchema = new mongoose.Schema({
         required: true
     },
     status: {
-        type: String,
-        enum: ['active', 'inactive'],
-        default: 'active'
+        type: Boolean,
+        default: false
     },
     dateCreated: {
         type: Date,

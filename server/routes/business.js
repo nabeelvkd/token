@@ -228,6 +228,23 @@ router.put('/nexttoken/:tokenId', authMiddleware, async (req, res) => {
     }
 });
 
+router.put('/toggletoken/:tokenId', authMiddleware, async (req, res) => {
+    try {
+        const token = await Token.findById(req.params.tokenId);
+        if (!token) {
+            return res.status(404).json({ message: "Token not found" });
+        }
+
+        token.status = !token.status; 
+        await token.save();
+        eventBus.emit('tokenUpdated', req.params.tokenId);
+        res.status(200).json({ message: "Status toggled successfully", status: token.status });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+
 
 
 

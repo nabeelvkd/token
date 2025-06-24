@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import HomeNavbar from "../../components/user/HomeNavbar"
+import HomeNavbar from "../../components/user/HomeNavbar";
 import { Star, Calendar, Clock, MapPin, User, MessageSquare, Plus } from 'lucide-react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import Token from '../../components/user/token';
 import MapView from '../../components/user/MapView';
 
-export default function BusinessProfile() {
+export default function BusinessProfileClone() {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedSlot, setSelectedSlot] = useState('');
     const [appointmentNotes, setAppointmentNotes] = useState('');
-    const [services, setServices] = useState([])
-    const [tokenData, setTokenData] = useState({ current: 0, next: 0, waitTime: '0h 0m' });
+    const [services, setServices] = useState([]);
+    const [tokenData, setTokenData] = useState({ current: 0, next: 0, waitTime: '0h 0m', status: false });
     const [selectedService, setSelectedService] = useState('Select a Token');
     const [reviewForm, setReviewForm] = useState({
         rating: 0,
@@ -21,34 +21,33 @@ export default function BusinessProfile() {
     const [business, setBusiness] = useState({
         name: '',
         address: '',
-        location:{latitude:9.9463,longitude:76.8337}
-    })
-    const location = useLocation()
+        subCategory: '',
+        location: { latitude: 9.9463, longitude: 76.8337 }
+    });
+    const location = useLocation();
 
     useEffect(() => {
         let ignore = false;
-
-        axios.get(`http://localhost:5000/businessprofile${location.pathname}`)
+        const parts = location.pathname.split('/');
+        const id = parts[parts.length - 1];
+        axios.get(`http://localhost:5000/businessprofile/${id}`)
             .then((response) => {
                 if (!ignore) {
-                    console.log(response.data.business)
                     setBusiness(response.data.business);
                     setServices(response.data.tokens);
 
                     const firstTokenId = response.data.tokens[0]?.id;
                     if (firstTokenId) {
                         setSelectedService(firstTokenId);
-
-                        axios.get(`http://localhost:5000/token/${firstTokenId}`).then((res) => {
-                            setTokenData(res.data);
-                        }).catch((err) => console.error("Initial tokenData fetch error", err));
+                        axios.get(`http://localhost:5000/token/${firstTokenId}`)
+                            .then((res) => setTokenData(res.data))
+                            .catch((err) => console.error("Initial tokenData fetch error", err));
                     }
                 }
             });
 
         return () => { ignore = true; };
     }, []);
-
 
     const [reviews, setReviews] = useState([
         {
@@ -69,6 +68,9 @@ export default function BusinessProfile() {
 
     const timeSlots = [
         { time: '9:00 AM', available: true },
+        { time: '10:00 AM', available: true },
+        { time: '11:00 AM', available: false },
+        { time: '12:00 PM', available: true }
     ];
 
     const handleAppointmentBook = () => {
@@ -121,27 +123,36 @@ export default function BusinessProfile() {
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen  font-sans">
             <HomeNavbar />
-
             <div className="max-w-6xl mx-auto p-6">
-
                 {/* Header */}
-                <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-6">
-                            <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center">
-                                <User className="w-8 h-8 text-white" />
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        {/* Left: Icon + Info */}
+                        <div className="flex items-start sm:items-center space-x-4 sm:space-x-6">
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+                                <User className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-light text-gray-900 mb-2">{business.name}</h1>
-                                <p className="text-gray-600 mb-3">{business.subCategory}</p>
-                                <div className="flex items-center text-gray-500">
-                                    <MapPin className="w-4 h-4 mr-2" />
+                                <h1 className="text-xl sm:text-3xl font-semibold text-gray-900 mb-1">{business.name}</h1>
+                                <p className="text-gray-600 text-sm sm:text-base mb-2">{business.subCategory}</p>
+                                <div className="flex items-center text-gray-500 text-sm sm:text-base">
+                                    <MapPin className="w-4 h-4 mr-2 text-red-500" />
                                     <span>{business.address}</span>
                                 </div>
+                                {business.phone && (
+                                    <a
+                                        href={`tel:${business.phone}`}
+                                        className="inline-block mt-3 text-blue-600 font-medium text-sm sm:text-base hover:underline"
+                                    >
+                                        📞 Call Now
+                                    </a>
+                                )}
                             </div>
                         </div>
+
+                        {/* Right: Rating */}
                         <div className="flex items-center space-x-2">
                             {renderStars(4)}
                             <span className="text-gray-600 font-medium">4.0</span>
@@ -149,27 +160,34 @@ export default function BusinessProfile() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                     {/* Left Column */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/*Map*/}
-
                         {/* Token Section */}
-                        <Token services={services} setSelectedService={setSelectedService} selectedService={selectedService} tokenData={tokenData} setTokenData={setTokenData} />
+
+                        <Token
+                            services={services}
+                            setSelectedService={setSelectedService}
+                            selectedService={selectedService}
+                            tokenData={tokenData}
+                            setTokenData={setTokenData}
+                        />
 
                         {/* Appointment Section */}
-                        <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
-                            <h2 className="text-2xl font-light text-gray-900 mb-6 flex items-center">
-                                <Calendar className="w-6 h-6 mr-3 text-blue-500" />
+                        <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+                            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                                <Calendar className="w-6 h-6 mr-3 text-blue-600" />
                                 Book Appointment
                             </h2>
 
                             <div className="mb-8">
-                                <label className="block text-gray-700 font-medium mb-4 uppercase tracking-wide text-sm">Select Date</label>
+                                <label className="block text-gray-700 font-medium mb-4 uppercase tracking-wide text-sm">
+                                    Select Date
+                                </label>
                                 <input
                                     type="date"
-                                    className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-blue-500 focus:outline-none"
+                                    className="w-full p-4 border-2 border-gray-200 rounded-xl text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                     value={selectedDate}
                                     onChange={(e) => setSelectedDate(e.target.value)}
                                 />
@@ -177,17 +195,19 @@ export default function BusinessProfile() {
 
                             {selectedDate && (
                                 <div className="mb-8">
-                                    <label className="block text-gray-700 font-medium mb-4 uppercase tracking-wide text-sm">Available Slots</label>
-                                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 mb-6">
+                                    <label className="block text-gray-700 font-medium mb-4 uppercase tracking-wide text-sm">
+                                        Available Slots
+                                    </label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
                                         {timeSlots.map((slot) => (
                                             <button
                                                 key={slot.time}
                                                 onClick={() => slot.available && setSelectedSlot(slot.time)}
                                                 disabled={!slot.available}
-                                                className={`p-3 text-sm font-medium rounded-lg transition-colors ${slot.available
+                                                className={`p-3 text-sm font-medium rounded-xl transition-all ${slot.available
                                                     ? selectedSlot === slot.time
-                                                        ? 'bg-blue-500 text-white'
-                                                        : 'border border-gray-300 text-gray-700 hover:border-gray-400'
+                                                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
+                                                        : 'border border-gray-300 text-gray-700 hover:bg-blue-50 hover:scale-[1.02]'
                                                     : 'border border-gray-200 text-gray-400 cursor-not-allowed'
                                                     }`}
                                             >
@@ -205,7 +225,7 @@ export default function BusinessProfile() {
                                             <span>Booked</span>
                                         </div>
                                         <div className="flex items-center">
-                                            <div className="w-4 h-4 bg-blue-500 rounded mr-2"></div>
+                                            <div className="w-4 h-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded mr-2"></div>
                                             <span>Selected</span>
                                         </div>
                                     </div>
@@ -214,9 +234,11 @@ export default function BusinessProfile() {
 
                             {selectedSlot && (
                                 <div className="mb-8">
-                                    <label className="block text-gray-700 font-medium mb-4 uppercase tracking-wide text-sm">Notes</label>
+                                    <label className="block text-gray-700 font-medium mb-4 uppercase tracking-wide text-sm">
+                                        Notes
+                                    </label>
                                     <textarea
-                                        className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-blue-500 focus:outline-none"
+                                        className="w-full p-4 border-2 border-gray-200 rounded-xl text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                         rows="3"
                                         placeholder="Special requests or preferences..."
                                         value={appointmentNotes}
@@ -228,67 +250,20 @@ export default function BusinessProfile() {
                             <button
                                 onClick={handleAppointmentBook}
                                 disabled={!selectedDate || !selectedSlot}
-                                className={`w-full p-4 rounded-lg text-lg font-medium uppercase tracking-wide transition-colors ${selectedDate && selectedSlot
-                                    ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                className={`w-full p-4 rounded-xl text-lg font-medium uppercase tracking-wide transition-all ${selectedDate && selectedSlot
+                                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:scale-105 active:scale-[0.98]'
                                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                     }`}
                             >
                                 {selectedDate && selectedSlot
-                                    ? `Confirm Appointment`
+                                    ? 'Confirm Appointment'
                                     : 'Select Date & Time'
                                 }
                             </button>
                         </div>
-                    </div>
-
-
-
-                    {/* Right Column */}
-                    <div className="space-y-8">
-                        <MapView latitude={business.location.latitude} longitude={business.location.longitude} />
-
-                        {/* Add Review */}
-                        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                            <h3 className="text-xl font-light text-gray-900 mb-6 flex items-center">
-                                <Plus className="w-5 h-5 mr-2 text-blue-500" />
-                                Add Review
-                            </h3>
-
-                            <div className="space-y-4">
-                                <input
-                                    type="text"
-                                    className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-blue-500 focus:outline-none"
-                                    placeholder="Your name"
-                                    value={reviewForm.name}
-                                    onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                                />
-
-                                <div>
-                                    <label className="block text-gray-700 font-medium mb-3 uppercase tracking-wide text-sm">Rating</label>
-                                    {renderStars(reviewForm.rating, true, (rating) => setReviewForm({ ...reviewForm, rating }))}
-                                </div>
-
-                                <textarea
-                                    className="w-full p-4 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-blue-500 focus:outline-none"
-                                    rows="4"
-                                    placeholder="Share your experience..."
-                                    value={reviewForm.comment}
-                                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                                ></textarea>
-
-                                <button
-                                    onClick={handleReviewSubmit}
-                                    className="w-full bg-blue-500 text-white p-4 rounded-lg font-medium uppercase tracking-wide hover:bg-blue-600 transition-colors"
-                                >
-                                    Submit Review
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Reviews Display */}
-                        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                            <h3 className="text-xl font-light text-gray-900 mb-6 flex items-center">
-                                <MessageSquare className="w-5 h-5 mr-2 text-blue-500" />
+                        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                            <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                                <MessageSquare className="w-5 h-5 mr-2 text-blue-600" />
                                 Customer Reviews
                             </h3>
 
@@ -296,7 +271,7 @@ export default function BusinessProfile() {
                                 {reviews.map((review) => (
                                     <div key={review.id} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0">
                                         <div className="mb-3">
-                                            <div className="font-medium text-gray-900 mb-1">{review.name}</div>
+                                            <div className="font-medium text-gray-90038e">{review.name}</div>
                                             <div className="flex items-center justify-between">
                                                 {renderStars(review.rating)}
                                                 <span className="text-xs text-gray-500 uppercase tracking-wide">{review.date}</span>
@@ -307,6 +282,54 @@ export default function BusinessProfile() {
                                 ))}
                             </div>
                         </div>
+                    </div>
+
+                    {/* Right Column */}
+                    <div className="space-y-8">
+                        <MapView latitude={business.location.latitude} longitude={business.location.longitude} />
+
+                        {/* Add Review */}
+                        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                            <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                                <Plus className="w-5 h-5 mr-2 text-blue-600" />
+                                Add Review
+                            </h3>
+
+                            <div className="space-y-4">
+                                <input
+                                    type="text"
+                                    className="w-full p-4 border-2 border-gray-200 rounded-xl text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                    placeholder="Your name"
+                                    value={reviewForm.name}
+                                    onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                                />
+
+                                <div>
+                                    <label className="block text-gray-700 font-medium mb-3 uppercase tracking-wide text-sm">
+                                        Rating
+                                    </label>
+                                    {renderStars(reviewForm.rating, true, (rating) => setReviewForm({ ...reviewForm, rating }))}
+                                </div>
+
+                                <textarea
+                                    className="w-full p-4 border-2 border-gray-200 rounded-xl text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                    rows="4"
+                                    placeholder="Share your experience..."
+                                    value={reviewForm.comment}
+                                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                                ></textarea>
+
+                                <button
+                                    onClick={handleReviewSubmit}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-xl font-medium uppercase tracking-wide hover:from-blue-700 hover:scale-105 transition-all active:scale-[0.98]"
+                                >
+                                    Submit Review
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Reviews Display */}
+
                     </div>
                 </div>
             </div>

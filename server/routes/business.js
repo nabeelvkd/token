@@ -3,12 +3,25 @@ var router = express.Router();
 var businessHelper = require('../helpers/businessHelper')
 var Service = require('../models/service')
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+const JWT_SECRET = process.env.JWT_SECRET;
 var Members = require('../models/members')
 var WorkingHours = require('../models/workingHours')
 var Token = require('../models/token')
 var TokenQueue = require('../models/tokenQueue')
 const eventBus = require('../eventbus')
+const multer = require('multer')
+const path = require('path');
+const { v2: cloudinary } = require('cloudinary');
+const streamifier = require('streamifier')
+require('dotenv').config();
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET,
+});
+
+const upload = multer();
 
 function convertTo12Hour(time) {
     const [hour, minute] = time.split(':');
@@ -52,9 +65,9 @@ router.post('/login', async (req, res) => {
     const { phoneNumber, password } = req.body;
     const result = await businessHelper.login(phoneNumber, password);
     if (!result.success) {
-        res.status(400).json({ message: "login failed" });
+        return res.status(400).json({ message: "login failed" });
     }
-    res.status(200).json(result);
+    return res.status(200).json(result);
 
 });
 
@@ -232,12 +245,48 @@ router.put('/toggletoken/:tokenId', authMiddleware, async (req, res) => {
             return res.status(404).json({ message: "Token not found" });
         }
 
-        token.status = !token.status; 
+        token.status = !token.status;
         await token.save();
         eventBus.emit('tokenUpdated', req.params.tokenId);
         res.status(200).json({ message: "Status toggled successfully", status: token.status });
     } catch (error) {
         res.status(400).json({ message: error.message });
+    }
+});
+
+router.post('/uploadprofile', authMiddleware, upload.single('image'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    const businessId = req.user.id;
+    if (!businessId) return res.status(400).json({ message: 'Missing business_id' });
+
+    try {
+        const streamUpload = (buffer) => {
+            return new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: 'profile', // optional Cloudinary folder
+                        public_id: `${businessId}_profile`, // custom filename
+                        overwrite: true, // optional: overwrite if already exists
+                    },
+                    (error, result) => {
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            reject(error);
+                        }
+                    }
+                );
+                streamifier.createReadStream(buffer).pipe(stream);
+            });
+        };
+
+        const result = await streamUpload(req.file.buffer);
+
+        res.json({ message: 'Upload successful', imageUrl: result.secure_url });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Upload failed' });
     }
 });
 

@@ -5,11 +5,19 @@ import {
     Home as HomeIcon, Star, LogOut, Users
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [companyName,setCompanyName]=useState('')
     const navigate=useNavigate()
+
+    const jwtToken=localStorage.getItem('businessToken')
+    const decoded=jwtDecode(jwtToken)
+    useEffect(()=>{
+        setCompanyName(decoded.name)
+    },[])
+    
 
     const menuItems = [
         { name: "Home", icon: HomeIcon, path: "/business/home" },

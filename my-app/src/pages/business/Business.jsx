@@ -6,6 +6,7 @@ import BusinessHome from "./BusinessHome";
 import Services from "../../components/business/Services";
 import Members from "../../components/business/Members"
 import ManageTokens from "../../components/business/ManageTokens"
+import EditProfile from "../../components/business/EditProfile";
 
 function Business() {
 
@@ -23,6 +24,7 @@ function Business() {
                 <Route path="home" element={<BusinessHome />} />
                 <Route path='members' element={<Members />} />
                 <Route path='tokens' element={<ManageTokens />} />
+                <Route path='profile' element={<EditProfile/>}/>
                 <Route path="services" element={<Services reg={true} services={services} setServices={setServices} serviceType={serviceType} setServiceType={setServiceType} />} />
             </Routes>
         </div>

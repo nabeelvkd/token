@@ -13,7 +13,12 @@ export default function ManageToken({ admin }) {
     const [formError, setFormError] = useState("");
     const tokenListRef = useRef(null);
 
-    const jwtToken = localStorage.getItem("businessToken") || localStorage.getItem("MemberToken");
+    let jwtToken = null
+    if (admin){
+        jwtToken=localStorage.getItem('businessToken')
+    }else{
+        jwtToken=localStorage.getItem('MemberToken')
+    }
 
     let businessId = null;
     let decoded = null
@@ -21,7 +26,7 @@ export default function ManageToken({ admin }) {
     if (jwtToken) {
         try {
             decoded = jwtDecode(jwtToken);
-            if (decoded.businessId) {
+            if (!admin) {
                 businessId = decoded.businessId
             } else {
                 businessId = decoded.id;
@@ -46,7 +51,6 @@ export default function ManageToken({ admin }) {
                 } else {
                     setServices(fetchedServices);
                 }
-
             })
             .catch((error) => console.error("Error fetching services:", error));
     }, []);

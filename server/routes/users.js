@@ -11,6 +11,9 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/listing/:category', async (req, res) => {
+  if(!req.params.category){
+    res.status(200).json([])
+  }
   const result = await userHelper.getBusinessByCategory(req.params.category)
   if (!result.success) {
     res.status(400).json("internal error")

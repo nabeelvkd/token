@@ -75,7 +75,6 @@ export default function BusinessLogin() {
             setIsLoading(false);
 
             const { token, message } = response.data;
-            console.log("Login response:", response.data);
 
             if (token && isAdminLogin) {
                 localStorage.setItem("businessToken", token);

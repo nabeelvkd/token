@@ -25,11 +25,11 @@ export default function BusinessProfileClone() {
         location: { latitude: 9.9463, longitude: 76.8337 }
     });
     const location = useLocation();
-
+    const parts = location.pathname.split('/');
+    const id = parts[parts.length - 1];
     useEffect(() => {
         let ignore = false;
-        const parts = location.pathname.split('/');
-        const id = parts[parts.length - 1];
+
         axios.get(`http://localhost:5000/businessprofile/${id}`)
             .then((response) => {
                 if (!ignore) {
@@ -131,8 +131,9 @@ export default function BusinessProfileClone() {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         {/* Left: Icon + Info */}
                         <div className="flex items-start sm:items-center space-x-4 sm:space-x-6">
-                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                                <User className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                            <div className="w-40 h-40 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+                                <img src={`https://res.cloudinary.com/delxsxtn6/image/upload/profile/${id}_profile.png`} alt="" />
+                                <User className="w-10 h-10 sm:w-8 sm:h-8 text-white" />
                             </div>
                             <div>
                                 <h1 className="text-xl sm:text-3xl font-semibold text-gray-900 mb-1">{business.name}</h1>
@@ -153,9 +154,9 @@ export default function BusinessProfileClone() {
                         </div>
 
                         {/* Right: Rating */}
-                        <div className="flex items-center space-x-2">
+                        <div className="hidden sm:flex items-center space-x-2">
                             {renderStars(4)}
-                            <span className="text-gray-600 font-medium">4.0</span>
+                            <span className="text-gray-800 font-semibold text-lg">4.0</span>
                         </div>
                     </div>
                 </div>
@@ -321,7 +322,7 @@ export default function BusinessProfileClone() {
 
                                 <button
                                     onClick={handleReviewSubmit}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-xl font-medium uppercase tracking-wide hover:from-blue-700 hover:scale-105 transition-all active:scale-[0.98]"
+                                    className="w-full bg-gradient-to-r from-blue-800 to-blue-700 text-white p-4 rounded-xl font-medium uppercase tracking-wide hover:from-blue-700 hover:scale-105 transition-all active:scale-[0.98]"
                                 >
                                     Submit Review
                                 </button>

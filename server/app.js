@@ -7,12 +7,14 @@ var mongoose = require('mongoose')
 require('dotenv').config();
 const cors = require('cors');
 
-
 var indexRouter = require('./routes/business');
 var usersRouter = require('./routes/users');
 var adminRouter = require('./routes/admin')
 var app = express();
 app.use(cors());
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 //mongodb connection
 mongoose.connect(process.env.MONGODB_URI,{
 }).then(()=> console.log("Mongodb connnected"))

@@ -14,13 +14,16 @@ import { jwtDecode } from 'jwt-decode';
 
 export default function MemberDashboard() {
     useMemberAuth()
+    let decoded=null
     const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState('tokens');
 
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     const [showAppointmentHistory, setShowAppointmentHistory] = useState(false);
     const token = localStorage.getItem("MemberToken");
-    const decoded=jwtDecode(token)
+    if(token){
+        decoded=jwtDecode(token)
+    }
 
     const allAppointments = [
         { id: 1, customer: "Alice Brown", service: "Haircutting", time: "2:00 PM", status: "confirmed" },

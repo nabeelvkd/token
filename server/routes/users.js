@@ -12,14 +12,18 @@ router.get('/', function (req, res, next) {
 
 router.get('/listing/:category', async (req, res) => {
   if(!req.params.category){
-    res.status(200).json([])
+    return res.status(200).json([])
   }
   const result = await userHelper.getBusinessByCategory(req.params.category)
   if (!result.success) {
-    res.status(400).json("internal error")
+    return res.status(400).json("internal error")
   }
-  res.status(200).json(result)
+  return res.status(200).json(result)
 });
+
+router.get('/businessprofile',(req,res)=>{
+  res.status(400).json({message:"Business not found"})
+})
 
 router.get('/businessprofile/:businessId', async (req, res) => {
   try {
@@ -51,7 +55,7 @@ router.get('/token/:tokenId', async (req, res) => {
     result = await userHelper.getTokenStatus(req.params.tokenId)
 
     if (!result.status) {
-      res.status(400)
+      return res.status(400)
     }
     return res.status(200).json(result)
   } catch (error) {
@@ -76,9 +80,9 @@ router.get('/tokenstream/:tokenId', (req, res) => {
         res.write(`event: error\ndata: ${JSON.stringify({ message: 'Token not found' })}\n\n`);
         return;
       }
-      res.write(`data: ${JSON.stringify(result)}\n\n`);
+      return res.write(`data: ${JSON.stringify(result)}\n\n`);
     } catch (error) {
-      res.write(`event: error\ndata: ${JSON.stringify({ message: error.message })}\n\n`);
+      return res.write(`event: error\ndata: ${JSON.stringify({ message: error.message })}\n\n`);
     }
   };
 

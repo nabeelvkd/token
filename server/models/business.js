@@ -25,6 +25,7 @@ const reverseGeocode = async (latitude, longitude) => {
   try {
     const response = await axios.get(url);
     const address = response.data.address;
+    console.log(address)
     
     // Extract locality and city
     const locality = address.hamlet || address.town ||'Unknown Locality';

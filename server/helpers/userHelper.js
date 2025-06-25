@@ -5,10 +5,14 @@ const Token = require('../models/token')
 const moment = require('moment')
 const SubCategory = require('../models/subCategory')
 const TokenQueue = require('../models/tokenQueue');
+const mongoose=require('mongoose')
 
 const getBusinessByCategory = async (category) => {
     try {
         const categoryDoc = await Categories.findOne({ slug: category })
+        if (!categoryDoc){
+            return { success: false, message: "Business not found" };
+        }
         categoryId = categoryDoc._id
         const businesses = await Business.find({ category: categoryId })
         return { success: true, businesses }
@@ -19,9 +23,13 @@ const getBusinessByCategory = async (category) => {
 
 const getBusiness = async (id) => {
     try {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if(!isValid){
+            return { success: false, message: "Invalid business ID format" };
+        }
         const business = await Business.findById(id);
         if (!business) {
-            return { success: false };
+            return { success: false, message: "Business not found" };
         }
 
         const tokenDocs = await Token.find({ businessId: id });

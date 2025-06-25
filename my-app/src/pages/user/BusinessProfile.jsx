@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import HomeNavbar from "../../components/user/HomeNavbar";
 import { Star, Calendar, Clock, MapPin, User, MessageSquare, Plus } from 'lucide-react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
+import { useLocation,Link } from 'react-router-dom';
 import Token from '../../components/user/token';
 import MapView from '../../components/user/MapView';
 
@@ -25,8 +25,12 @@ export default function BusinessProfileClone() {
         location: { latitude: 9.9463, longitude: 76.8337 }
     });
     const location = useLocation();
-    const parts = location.pathname.split('/');
+    let parts = location.pathname.split('/');
     const id = parts[parts.length - 1];
+    parts=parts.toString()
+    const slugMatch = parts.match(/^view(.+?)(\d{24})$/);
+    const slug = slugMatch ? slugMatch[1] : '';
+
     useEffect(() => {
         let ignore = false;
 
@@ -125,9 +129,13 @@ export default function BusinessProfileClone() {
     return (
         <div className="min-h-screen  font-sans">
             <HomeNavbar />
+
             <div className="max-w-6xl mx-auto p-6">
+                <Link to={`/view/${slug}`} className="text-blue-600 hover:underline p-3">
+                    {slug}Back
+                </Link>
                 {/* Header */}
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm mt-3">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         {/* Left: Icon + Info */}
                         <div className="flex items-start sm:items-center space-x-4 sm:space-x-6">

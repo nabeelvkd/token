@@ -216,7 +216,7 @@ function ListingHeader({
                             className='w-12 h-12 bg-white/80 backdrop-blur-sm p-3 rounded-2xl mr-6 hover:bg-white/90 hover:shadow-lg transform hover:scale-105 transition-all duration-200 border border-white/20 group'
                             onClick={() => navigate('/view')}
                         >
-                            <ChevronLeft className="w-6 h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
+                            <ChevronLeft className="w-6 h-6 text-blue-800 group-hover:text-blue-600 transition-colors" />
                         </button>
                         <div>
                             <h1 className="text-4xl font-bold text-white">{categoryName}</h1>
@@ -270,7 +270,7 @@ function ListingHeader({
                                 <button
                                     onClick={getCurrentLocation}
                                     disabled={isGettingLocation}
-                                    className="px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white transition-colors duration-200 flex items-center justify-center min-w-[60px]"
+                                    className="px-4 bg-blue-800 hover:bg-blue-700 disabled:bg-blue-400 text-white transition-colors duration-200 flex items-center justify-center min-w-[60px]"
                                     title="Use current location"
                                 >
                                     {isGettingLocation ? (

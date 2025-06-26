@@ -26,10 +26,10 @@ const reverseGeocode = async (latitude, longitude) => {
     const response = await axios.get(url);
     const address = response.data.address;
     console.log(address)
-    
+
     // Extract locality and city
-    const locality = address.hamlet || address.town ||'Unknown Locality';
-    const city = address.city || address.county || address.state_district||'Unknown City';
+    const locality = address.hamlet || address.town || address.suburb || address.road|| 'Unknown Locality';
+    const city = address.city || address.county || address.state_district || 'Unknown City';
 
     return { locality, city };
   } catch (error) {

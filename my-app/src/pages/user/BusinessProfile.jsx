@@ -144,7 +144,7 @@ export default function BusinessProfileClone() {
                                 <User className="w-10 h-10 sm:w-8 sm:h-8 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-xl sm:text-3xl font-semibold text-gray-900 mb-1">{business.name}</h1>
+                                <h1 className="text-xl sm:text-3xl font-bold text-blue-800 mb-1">{business.name}</h1>
                                 <p className="text-gray-600 text-sm sm:text-base mb-2">{business.subCategory}</p>
                                 <div className="flex items-center text-gray-500 text-sm sm:text-base">
                                     <MapPin className="w-4 h-4 mr-2 text-red-500" />

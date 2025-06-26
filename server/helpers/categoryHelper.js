@@ -14,7 +14,7 @@ const addCategory = async (data) => {
         const category = new Category({
             name: data.name,
             slug,
-            iconUrl: data.iconUrl || "",
+            iconUrl: data.image || "",
             isActive: data.isActive !== undefined ? data.isActive : true,
             priority: data.priority || 0,
         });
@@ -64,7 +64,7 @@ const updateCategory = async (data) => {
             category.slug = slugify(data.name, { lower: true, strict: true });
         }
 
-        if (data.iconUrl !== undefined) category.iconUrl = data.iconUrl;
+        if (data.image !== undefined) category.iconUrl = data.image;
         if (data.isActive !== undefined) category.isActive = data.isActive;
         if (data.priority !== undefined) category.priority = data.priority;
 

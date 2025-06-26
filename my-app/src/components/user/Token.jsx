@@ -14,19 +14,20 @@ function Token({ services, selectedService, setSelectedService, tokenData, setTo
     const businessId = pathParts[pathParts.length - 1];
 
     useEffect(() => {
-        if (selectedService === "Select a Token" || !selectedService) return;
+    if (selectedService === "Select a Token" || !selectedService) return;
+    
+    const fetchTokenStatus = async () => {
+        try {
+            const response = await axios.get(`http://localhost:5000/token/${selectedService}`);
+            setTokenData(response.data);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+    
+    fetchTokenStatus();
+}, [selectedService]);
 
-        const fetchTokenStatus = async () => {
-            try {
-                const response = await axios.get(`http://localhost:5000/token/${selectedService}`);
-                setTokenData(response.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-
-        fetchTokenStatus();
-    }, [selectedService]);
 
     useEffect(() => {
         if (selectedService === "Select a Token" || !selectedService) return;
@@ -54,7 +55,7 @@ function Token({ services, selectedService, setSelectedService, tokenData, setTo
         return () => {
             eventSource.close(); // Clean up
         };
-    });
+    },[selectedService]);
 
     const handleBookToken = () => {
         setShowForm(true);

@@ -6,10 +6,6 @@ const TokenQueue=require('../models/tokenQueue')
 const eventBus=require('../eventbus')
 
 /* GET users listing. */
-router.get('/', function (req, res, next) {
-  res.send('respond with a resource');
-});
-
 router.get('/listing/:category', async (req, res) => {
   if(!req.params.category){
     return res.status(200).json([])
@@ -52,16 +48,18 @@ router.post('/booktoken', async (req, res) => {
 
 router.get('/token/:tokenId', async (req, res) => {
   try {
-    result = await userHelper.getTokenStatus(req.params.tokenId)
+    const result = await userHelper.getTokenStatus(req.params.tokenId);
 
-    if (!result.status) {
-      return res.status(400)
+    if (!result.success) {
+      return res.status(404).json(result); 
     }
-    return res.status(200).json(result)
+
+    return res.status(200).json(result);
   } catch (error) {
-    return res.status(400).json({ message: error.message })
+    return res.status(500).json({ success: false, message: error.message });
   }
-})
+});
+
 
 router.get('/tokenstream/:tokenId', (req, res) => {
   const tokenId = req.params.tokenId;

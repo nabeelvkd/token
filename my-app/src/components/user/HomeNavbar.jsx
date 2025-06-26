@@ -21,7 +21,7 @@ export default function UserNavbar() {
     };
 
     return (
-        <div className="bg-gradient-to-r from-indigo-800 to-indigo-600 shadow-lg">
+        <div className="bg-blue-800 ">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between py-4">
                     {/* Logo */}
@@ -31,17 +31,6 @@ export default function UserNavbar() {
 
                     {/* Search and Profile */}
                     <div className="flex items-center space-x-3 md:space-x-6">
-                        {/* Search Bar */}
-                        <div className="relative w-40 md:w-64">
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={handleSearch}
-                                placeholder="Search business..."
-                                className="placeholder-white w-full pl-10 pr-4 py-2 text-sm text-gray-800 bg-white/20 backdrop-blur-md border border-white/30 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 placeholder-gray-500"
-                            />
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70" />
-                        </div>
 
                         {/* Profile Section */}
                         <div className="relative">

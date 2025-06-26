@@ -1,4 +1,24 @@
 {
+  "name": "tokenify",
+  "version": "1.0.0",
+  "description": "Online Token & Appointment Booking System",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run start",
+    "client": "cd my-app && npm run dev",
+    "build": "cd my-app && npm run build",
+    "start": "cd server && npm start",
+    "install-deps": "npm install && cd server && npm install && cd ../my-app && npm install",
+    "lint": "cd my-app && npm run lint",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": ["token", "appointment", "booking", "business", "queue"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
   "dependencies": {
     "axios": "^1.10.0",
     "cloudinary": "^2.7.0",
